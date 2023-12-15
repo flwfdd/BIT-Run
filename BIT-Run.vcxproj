@@ -138,15 +138,21 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />
+    <MASM Include="render.asm" />
+    <MASM Include="state.asm" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="BIT-Run.rc" />
+    <Image Include="image\bit_badge.bmp" />
+    <Image Include="image\goose_jump.bmp" />
+    <Image Include="image\goose_run0.bmp" />
+    <Image Include="image\goose_run1.bmp" />
+    <Image Include="image\goose_stand.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="image\tower25x50.bmp" />
+    <ResourceCompile Include="BIT-Run.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
