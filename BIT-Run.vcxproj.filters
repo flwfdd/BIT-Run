@@ -23,6 +23,12 @@
     <MASM Include="main.asm">
       <Filter>源文件</Filter>
     </MASM>
+    <MASM Include="render.asm">
+      <Filter>源文件</Filter>
+    </MASM>
+    <MASM Include="state.asm">
+      <Filter>源文件</Filter>
+    </MASM>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -30,13 +36,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="image\goose_jump.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\goose_run0.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\goose_run1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\goose_stand.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\bit_badge.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="BIT-Run.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="image\tower25x50.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
   </ItemGroup>
 </Project>
