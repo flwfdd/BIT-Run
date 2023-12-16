@@ -21,6 +21,10 @@ includelib  msvcrt.lib
 S_MAIN_WINDOW_TITLE byte '北理润 - BITRun', 0 ; 主窗口标题
 S_MAIN_CLASS_NAME byte 'main_window_class', 0 ; 主窗口类名
 
+S_SHCOREDLL byte 'User32.dll',0
+S_SETDPIFNAME byte 'SetProcessDPIAware',0
+
+
 .data
 $thread_live dword 1 ; 线程存活标志 为0时线程退出
 $buffer_index dword 0 ; 缓冲区索引 指向最新绘制好的缓冲区
@@ -332,6 +336,12 @@ _main_window PROC
     mov @window_class.hbrBackground, COLOR_WINDOW+1
     mov @window_class.lpszClassName, offset S_MAIN_CLASS_NAME
     invoke RegisterClassEx, addr @window_class
+
+    ;invoke SetProcessDPIAware
+    invoke LoadLibrary, offset S_SHCOREDLL
+    invoke GetProcAddress,eax, offset S_SETDPIFNAME
+    call eax
+    
 
     invoke CreateWindowEx, 0, offset S_MAIN_CLASS_NAME, offset S_MAIN_WINDOW_TITLE, WS_CAPTION or WS_SYSMENU or WS_MINIMIZEBOX xor WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, NULL, $h_instance, NULL
     mov $h_window_main, eax
