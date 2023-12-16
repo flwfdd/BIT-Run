@@ -51,6 +51,12 @@
     <Image Include="image\bit_badge.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="image\bird0.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\bird1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BIT-Run.rc">

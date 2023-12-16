@@ -65,8 +65,15 @@ _state_update PROC uses ebx
 	mov [ebx + RenderObject.x], 100
 	mov [ebx + RenderObject.y], 50
 	mov [ebx + RenderObject.z], 0
-	invoke _get_image, IMAGE_BIT_BADGE_ID
-	mov [ebx + RenderObject.p_image], eax
+	mov eax, $state.time
+	and eax, 0100h
+	.if eax == 0
+		invoke _get_image, IMAGE_BIRD0_ID
+		mov [ebx + RenderObject.p_image], eax
+	.elseif
+		invoke _get_image, IMAGE_BIRD1_ID
+		mov [ebx + RenderObject.p_image], eax
+	.endif
 
 	; 检查重叠情况
 	invoke _check_obj_overlap, offset a_render_object_test, offset a_render_object_test + sizeof RenderObject

@@ -145,6 +145,8 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="image\bird0.bmp" />
+    <Image Include="image\bird1.bmp" />
     <Image Include="image\bit_badge.bmp" />
     <Image Include="image\goose_jump.bmp" />
     <Image Include="image\goose_run0.bmp" />
