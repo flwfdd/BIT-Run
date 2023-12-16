@@ -10,12 +10,12 @@
 typedef struct Image {
 //    DWORD id;
     const TCHAR*nameid;
-    DWORD w;
-    DWORD h;
-    DWORD mask_color;
+    int w;
+    int h;
+    int mask_color;
     HANDLE h_dc;
     HANDLE h_bmp;
-    DWORD* a_mask;
+    int* a_mask;
 } Image,*pImage;
 
 

@@ -15,6 +15,7 @@ typedef struct GameState{
     int status;
     int time;
     int score;
+    int background_color;
     int render_object_size;
     RenderObject* a_p_render_object;
 
@@ -22,22 +23,23 @@ typedef struct GameState{
 } GameState;
 
 
-typedef struct Sprite{
-    RenderObject *prObj;
-    float vx; // relative to goose Reference System
-    float vy;
-    float x;
-    float y;
-
-}Sprite;
 
 
 void _init_state();
+void _add_render_object(RenderObject *p_render_object);
+void _update_render_object(RenderObject* p_robj);
+
+void _update_render_list();
+void _update_goose(RenderObject* p_render_object);
 
 
 
 
 void _state_update();
 void _key_down(WPARAM wParam, LPARAM lParam);
+
+
+int _check_obj_in_window(RenderObject *p_render_object);
+
 
 #endif //BIT_RUN_SPIRITS_H

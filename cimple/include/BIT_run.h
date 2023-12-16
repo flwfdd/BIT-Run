@@ -15,10 +15,13 @@
 
 #define FPS 100
 
-#define GINITVX 10.0  // global init vx
-#define JUMPVY 35.0
+#define GINITVX 400.0  // global init vx
+#define JUMPVY 800.0
 
-#define G      4
-#define JG     1
+#define G      1530.0
+#define JG     1500
+
+
+#define RENDER_OBJECT_SIZE 16  // 16 may enough
 
 #endif //BIT_RUN_BIT_RUN_H

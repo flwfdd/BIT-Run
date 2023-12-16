@@ -3,6 +3,7 @@
 //
 
 #include <stdio.h>
+#include <assert.h>
 #include "drawingThread.h"
 #include "BIT_run.h"
 #include "image.h"
@@ -30,6 +31,8 @@ extern GameState state;
 
 
 DWORD _refresh_interval_thread(LPVOID lpParam) {
+
+    state.time = game_ms;
     // temp no change to here
     while(thread_live==1){
 //        putchar('.');
@@ -88,6 +91,7 @@ void _render_buffer() {
     for (int i = 0; i < state.render_object_size; ++i) {
         RenderObject* p_render_object = state.a_p_render_object+i;
         Image*        p_image = p_render_object->p_image;
+        assert(p_image!=NULL);
         TransparentBlt(
                 ha_buffer_dc[indx],
                 p_render_object->x,
