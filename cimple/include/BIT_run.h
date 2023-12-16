@@ -12,6 +12,7 @@
 
 #define FPS 100
 
-
+#define G 0.05
+#define JUMPVY 2000.0
 
 #endif //BIT_RUN_BIT_RUN_H

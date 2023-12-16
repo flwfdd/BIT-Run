@@ -7,6 +7,7 @@
 #include "drawingThread.h"
 #include "BIT_run.h"
 #include "image.h"
+#include "spirits.h"
 
 
 // event handle here
@@ -38,6 +39,7 @@ void _init(){
     );
 
     _init_render();
+    _init_state();
 
     // thread start
     CreateThread(NULL,0,_refresh_interval_thread,NULL,0,NULL);

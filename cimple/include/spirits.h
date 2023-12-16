@@ -20,7 +20,24 @@ typedef struct GameState{
 } GameState;
 
 
-void _key_down(WPARAM wParam, LPARAM lParam);
+typedef struct Spirit{
+    RenderObject *prObj;
+    float vx; // relative to goose Reference System
+    float vy;
+    float x;
+    float y;
+
+    int jumping; // 0: not jumping, 1: jumping
+    int jumptstp;
+}Spirit;
+
+
+void _init_state();
+
+
+
+
 void _state_update();
+void _key_down(WPARAM wParam, LPARAM lParam);
 
 #endif //BIT_RUN_SPIRITS_H

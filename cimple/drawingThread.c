@@ -32,7 +32,7 @@ extern GameState state;
 DWORD _refresh_interval_thread(LPVOID lpParam) {
     // temp no change to here
     while(thread_live==1){
-        putchar('.');
+//        putchar('.');
         SetEvent(p_render_buffer_event);
         Sleep(1000/FPS);
         game_ms+=1000/FPS;
@@ -75,7 +75,7 @@ void _render_buffer() {
         indx = 0;
 
     //DEBUG
-    putchar(indx+'A');
+//    putchar(indx+'A');
 
     //DEBUG: Green square
     for (int i = 0; i < 30; ++i) {
@@ -112,7 +112,7 @@ void _render_window() {
     buffer_index_l = buffer_index;
 
     //DEBUG
-    putchar('a'+buffer_index_l);
+//    putchar('a'+buffer_index_l);
 
     h_dc = GetDC(h_window_main);
     BitBlt(h_dc,0,0,WINDOW_WIDTH,WINDOW_HEIGHT,
@@ -120,5 +120,10 @@ void _render_window() {
            0,0,
            SRCCOPY
     );
+
+    HANDLE bitmap = CreateCompatibleBitmap(h_dc,WINDOW_WIDTH,WINDOW_HEIGHT);
+    HANDLE oldmap = SelectObject(ha_buffer_dc[buffer_index_l],bitmap);
+    DeleteObject(oldmap);
+
     ReleaseDC(h_window_main,h_dc);
 }
