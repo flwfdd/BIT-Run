@@ -31,6 +31,187 @@ $p_a_image dword ? ; 指向图像数组的指针
 
 .code
 
+; 转换RGB为BGR
+_rgb2bgr PROC uses ebx esi edi @rgb:DWORD
+    mov eax, @rgb
+    and eax, 00FF0000h
+    shr eax, 16
+    mov ecx, @rgb
+    and ecx, 0000FF00h
+    or eax, ecx
+    mov ecx, @rgb
+    and ecx, 000000FFh
+    shl ecx, 16
+    or eax, ecx
+    ret
+_rgb2bgr ENDP
+
+; 判断是否在窗口内 输入RenderObject指针 输出是否在窗口内
+_check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
+	; 获取图像指针
+	mov esi, @p_obj
+    mov ecx, [esi + RenderObject.p_image]
+
+	; 判断是否在窗口内
+    ; 右
+	.if [esi + RenderObject.x] >= WINDOW_WIDTH
+		xor eax, eax
+		ret
+    .endif
+    ; 上
+    .if [esi + RenderObject.y] >= WINDOW_HEIGHT
+		xor eax, eax
+		ret
+	.endif
+    ; 左
+	mov eax, [esi + RenderObject.x]
+	add eax, [ecx + Image.w]
+	.if eax <= 0
+		xor eax, eax
+		ret
+	.endif
+    ; 下
+	mov eax, [esi + RenderObject.y]
+	add eax, [ecx + Image.h]
+	.if eax <= 0
+		xor eax, eax
+		ret
+	.endif
+
+	mov eax, 1
+	ret
+_check_obj_in_window ENDP
+
+; 判断是否碰撞 输入两个RenderObject指针 输出是否碰撞
+_check_obj_overlap PROC uses ebx esi edi @p_obj1:DWORD, @p_obj2:DWORD
+    local @p_image1:DWORD, @p_image2:DWORD
+    local @obj1_rect:RECT, @obj2_rect:RECT, @overlap_rect:RECT
+
+    ; 获取图像指针
+    mov esi, @p_obj1
+    mov eax, [esi + RenderObject.p_image]
+    mov ecx, eax
+    mov @p_image1, eax
+    mov edi, @p_obj2
+    mov eax, [edi + RenderObject.p_image]
+    mov edx, eax
+    mov @p_image2, eax
+
+    ; 快速判断矩形框是否重叠
+    ; 1完全在2左侧
+    mov eax, [esi + RenderObject.x]
+    mov @obj1_rect.left, eax
+    add eax, [ecx + Image.w]
+    mov @obj1_rect.right, eax
+    .if eax <= [edi + RenderObject.x]
+        xor eax, eax
+        ret
+    .endif
+    ; 1完全在2右侧
+    mov eax, [edi + RenderObject.x]
+    mov @obj2_rect.left, eax
+    add eax, [edx + Image.w]
+    mov @obj2_rect.right, eax
+    .if eax <= [esi + RenderObject.x]
+        xor eax, eax
+        ret
+    .endif
+    ; 1完全在2下方
+    mov eax, [esi + RenderObject.y]
+    mov @obj1_rect.bottom, eax
+    add eax, [ecx + Image.h]
+    mov @obj1_rect.top, eax
+    .if eax <= [edi + RenderObject.y]
+        xor eax, eax
+        ret
+    .endif
+    ; 1完全在2上方
+    mov eax, [edi + RenderObject.y]
+    mov @obj2_rect.bottom, eax
+    add eax, [edx + Image.h]
+    mov @obj2_rect.top, eax
+    .if eax <= [esi + RenderObject.y]
+        xor eax, eax
+        ret
+    .endif
+
+    ; 计算交叉区域
+    ; 计算交叉区域左侧
+    mov eax, @obj1_rect.left
+    .if eax < @obj2_rect.left
+        mov eax, @obj2_rect.left
+    .endif
+    mov @overlap_rect.left, eax
+    ; 计算交叉区域右侧
+    mov eax, @obj1_rect.right
+    .if eax > @obj2_rect.right
+        mov eax, @obj2_rect.right
+    .endif
+    mov @overlap_rect.right, eax
+    ; 计算交叉区域下方
+    mov eax, @obj1_rect.bottom
+    .if eax < @obj2_rect.bottom
+        mov eax, @obj2_rect.bottom
+    .endif
+    mov @overlap_rect.bottom, eax
+    ; 计算交叉区域上方
+    mov eax, @obj1_rect.top
+    .if eax > @obj2_rect.top
+        mov eax, @obj2_rect.top
+    .endif
+    mov @overlap_rect.top, eax
+
+    ; 像素判断是否有交叉区域
+    mov esi, @overlap_rect.top ; 从上到下
+    .while esi >= @overlap_rect.bottom
+        mov edi, @overlap_rect.left ; 从左到右
+        .while edi < @overlap_rect.right
+            ; 计算obj1 mask中相对坐标
+            mov eax, @obj1_rect.top
+            sub eax, esi ; 从上往下行索引
+            mov ebx, @p_image1
+            mov ebx, [ebx + Image.w]
+            mul ebx ; 计算行偏移
+            mov ebx, edi
+            sub ebx, @obj1_rect.left ; 从左往右列索引
+            add eax, ebx ; 计算偏移
+            ; 获取obj1 mask像素
+            mov ebx, @p_image1
+            mov ebx, [ebx + Image.a_mask]
+            .if byte ptr [ebx + eax] == 0
+                inc edi
+                .continue
+            .endif
+
+            ; 计算obj2 mask中相对坐标
+            mov eax, @obj2_rect.top
+            sub eax, esi ; 从上往下行索引
+            mov ebx, @p_image2
+            mov ebx, [ebx + Image.w]
+            mul ebx ; 计算行偏移
+            mov ebx, edi
+            sub ebx, @obj2_rect.left ; 从左往右列索引
+            add eax, ebx ; 计算偏移
+            ; 获取obj2 mask像素
+            mov ebx, @p_image2
+            mov ebx, [ebx + Image.a_mask]
+            .if byte ptr [ebx + eax] == 0
+                inc edi
+                .continue
+            .endif
+
+            ; 有交叉区域
+            mov eax, 1
+            ret
+        .endw
+        dec esi
+    .endw
+
+    xor eax, eax
+    ret
+_check_obj_overlap ENDP
+
+
 ; 渲染缓冲区
 _render_buffer PROC uses ebx esi edi
     ; 获取写入缓冲区的索引
@@ -45,35 +226,39 @@ _render_buffer PROC uses ebx esi edi
     add eax, 'A'
     invoke crt_putchar, eax
 
-    ; DEBUG 绘制绿色方块
-    mov esi, 0
-    .while esi < 30 ; x
-        mov edi, 0
-        .while edi < 30 ; y
-            ;lea eax, [8*eax+esi]
-            mov eax, 370
-            add eax, esi
-            mov ecx, edi
-            add ecx, 300
-            invoke SetPixel, $a_buffer_dc[4*ebx], eax, ecx, 00FF00h
-            inc edi
-        .endw
-        inc esi
-    .endw
+
+    ; 创建画刷
+    invoke _rgb2bgr, $state.background_color
+    invoke CreateSolidBrush, eax
+    mov esi, eax
+    ; 选择画刷
+    invoke SelectObject, $a_buffer_dc[4*ebx], esi
+    ; 填充背景颜色
+    invoke PatBlt, $a_buffer_dc[4*ebx], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, PATCOPY
+    ; 释放画刷
+    invoke DeleteObject, esi
+    
 
     ; 渲染对象
-    mov ecx, 0 ; 渲染对象索引
-    mov esi, $state.a_p_render_object ; 渲染对象地址
-    .while ecx < $state.render_object_size
-		mov eax, [esi + RenderObject.p_image]
-        ; 转换坐标
+    mov esi, 0 ; 渲染对象索引
+    mov edi, $state.p_a_render_object ; 渲染对象地址
+    .while esi < $state.render_object_size
+        ; 判断是否在窗口内
+        invoke _check_obj_in_window, edi
+        .if eax == 0
+			inc esi
+			add edi, sizeof RenderObject
+			.continue
+        .endif
+        ; 转换坐标为左下角原点 右上方向为正
+        mov eax, [edi + RenderObject.p_image]
         mov edx, WINDOW_HEIGHT
-        sub edx, [esi + RenderObject.y]
+        sub edx, [edi + RenderObject.y]
         sub edx, [eax + Image.h]
-        invoke TransparentBlt, $a_buffer_dc[4*ebx], [esi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+        invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
 		
-		inc ecx
-        add esi, 4
+		inc esi
+        add edi, sizeof RenderObject
     .endw
 
 
@@ -81,7 +266,6 @@ _render_buffer PROC uses ebx esi edi
     mov $buffer_index, ebx
     ret
 _render_buffer ENDP
-
 
 ; 渲染缓冲区到窗口
 _render_window PROC uses ebx
@@ -157,16 +341,7 @@ _init_image PROC uses ebx esi edi @p_image:DWORD
     mov ebx, @p_image
 
     ; 转换RGB为BGR
-    mov eax, [ebx + Image.mask_color]
-    and eax, 00FF0000h
-    shr eax, 16
-    mov ecx, [ebx + Image.mask_color]
-    and ecx, 0000FF00h
-    or eax, ecx
-    mov ecx, [ebx + Image.mask_color]
-    and ecx, 000000FFh
-    shl ecx, 16
-    or eax, ecx
+    invoke _rgb2bgr, [ebx + Image.mask_color]
     mov [ebx + Image.mask_color], eax
 
     ; 创建兼容设备上下文
@@ -239,9 +414,8 @@ _get_image PROC uses esi edi @id:DWORD
     ret
 _get_image ENDP
 
-
 ; 释放单个图像
-_free_image PROC  @p_image:DWORD
+_free_image PROC @p_image:DWORD
 	mov ebx, @p_image
 	invoke DeleteDC, [ebx + Image.h_dc]
 	invoke DeleteObject, [ebx + Image.h_bmp]

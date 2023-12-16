@@ -34,14 +34,15 @@ GameState STRUCT
     status DWORD ? ; 状态
     time DWORD ? ; 时间 单位毫秒
     score DWORD ? ; 分数
+    background_color DWORD ? ; 背景颜色
     render_object_size DWORD ? ; 绘制元素数量
-    a_p_render_object DWORD ? ; 绘制元素指针数组 每个元素是RenderObject指针
+    p_a_render_object DWORD ? ; 指向绘制元素数组的指针 数组中每个元素是RenderObject结构体
 GameState ENDS
 
 
 ; 图片
 
-IMAGES_START EQU $
+IMAGES_START EQU $ ; 开始标记
 
 IMAGE_GOOSE_STAND_ID DWORD 101
 IMAGE_GOOSE_STAND_MASK_COLOR DWORD 00FF00h
@@ -55,6 +56,6 @@ IMAGE_GOOSE_JUMP_MASK_COLOR DWORD 00FF00h
 IMAGE_BIT_BADGE_ID DWORD 201
 IMAGE_BIT_BADGE_MASK_COLOR DWORD 000000h
 
-IMAGES_END EQU $
+IMAGES_END EQU $ ; 结束标记
 
-IMAGES_SIZE EQU (IMAGES_END - IMAGES_START) / 8
+IMAGES_SIZE EQU (IMAGES_END - IMAGES_START) / 8 ; 计算图片数量
