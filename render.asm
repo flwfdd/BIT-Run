@@ -70,7 +70,18 @@ _render_buffer PROC uses ebx esi edi
         mov edx, WINDOW_HEIGHT
         sub edx, [esi + RenderObject.y]
         sub edx, [eax + Image.h]
-        invoke TransparentBlt, $a_buffer_dc[4*ebx], [esi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+        invoke TransparentBlt
+            $a_buffer_dc[4*ebx]
+            [esi + RenderObject.x]
+            edx
+            [eax + Image.w]
+            [eax + Image.h]
+            [eax + Image.h_dc]
+            0
+            0
+            [eax + Image.w]
+            [eax + Image.h]
+            [eax + Image.mask_color]
 		
 		inc ecx
         add esi, 4

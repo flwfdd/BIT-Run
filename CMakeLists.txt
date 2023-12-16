@@ -11,7 +11,7 @@ add_executable(BIT_Run
         cimple/drawingThread.c
         cimple/spirits.c
 )
-
+#set_target_properties(BIT_Run PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 set(CMAKE_GENERATOR_PLATFORM x86)
 
 

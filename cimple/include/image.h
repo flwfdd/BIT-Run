@@ -9,7 +9,7 @@
 
 typedef struct Image {
 //    DWORD id;
-    TCHAR*nameid;
+    const TCHAR*nameid;
     DWORD w;
     DWORD h;
     DWORD mask_color;

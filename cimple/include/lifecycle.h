@@ -21,4 +21,9 @@ void _free_images();
 
 void _close();
 
+void _init_render();
+void _free_render();
+
+pImage _get_image(char* nameid);
+
 #endif //BIT_RUN_LIFECYCLE_H

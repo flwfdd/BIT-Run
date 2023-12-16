@@ -37,9 +37,6 @@ S_SHCOREDLL byte 'User32.dll',0
 S_SETDPIFNAME byte 'SetProcessDPIAware',0
 
 
-.data
-$thread_live dword 1 ; 线程存活标志 为0时线程退出
-$buffer_index dword 0 ; 缓冲区索引 指向最新绘制好的缓冲区
 
 .data?
 $h_instance dword ? ; 程序实例句柄
@@ -224,9 +221,9 @@ _main_window PROC
 
 
     ;invoke SetProcessDPIAware
-    invoke LoadLibrary, offset S_SHCOREDLL
-    invoke GetProcAddress,eax, offset S_SETDPIFNAME
-    call eax
+    ;invoke LoadLibrary, offset S_SHCOREDLL
+    ;invoke GetProcAddress,eax, offset S_SETDPIFNAME
+    ;call eax
 
     mov @rect.left, 0
     mov @rect.top, 0
