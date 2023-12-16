@@ -17,19 +17,19 @@ typedef struct GameState{
     int score;
     int render_object_size;
     RenderObject* a_p_render_object;
+
+    int global_vx;
 } GameState;
 
 
-typedef struct Spirit{
+typedef struct Sprite{
     RenderObject *prObj;
     float vx; // relative to goose Reference System
     float vy;
     float x;
     float y;
 
-    int jumping; // 0: not jumping, 1: jumping
-    int jumptstp;
-}Spirit;
+}Sprite;
 
 
 void _init_state();

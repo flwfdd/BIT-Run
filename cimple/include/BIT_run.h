@@ -9,10 +9,16 @@
 #define WINDOW_HEIGHT 600
 #define BUFFER_SIZE  24
 
+#define HORIZON_HEIGHT 188
+#define GOOSE_INITIAL_X 100
+#define GOOSE_INITIAL_Y HORIZON_HEIGHT
 
 #define FPS 100
 
-#define G 0.05
-#define JUMPVY 2000.0
+#define GINITVX 10.0  // global init vx
+#define JUMPVY 35.0
+
+#define G      4
+#define JG     1
 
 #endif //BIT_RUN_BIT_RUN_H

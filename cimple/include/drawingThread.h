@@ -9,11 +9,11 @@
 #include "image.h"
 
 DWORD _refresh_interval_thread(LPVOID lpParam);
- DWORD _render_window_thread(LPVOID lpParam);
- DWORD _render_buffer_thread(LPVOID lpParam);
+DWORD _render_window_thread(LPVOID lpParam);
+DWORD _render_buffer_thread(LPVOID lpParam);
 
- void _render_buffer();
- void _render_window();
+void _render_buffer();
+void _render_window();
 
  typedef struct RenderObject{
      int x;
