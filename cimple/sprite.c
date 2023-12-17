@@ -173,14 +173,17 @@ void _state_update(){
 }
 
 
+SHORT lastkeystate;
 void _check_key_down() {
-    if(GetAsyncKeyState(VK_SPACE)){
+    SHORT keystate;
+    if((keystate=GetAsyncKeyState(VK_SPACE))){
+        printf("detect keypress at %d\n",state.time);
+
         switch (state.status) {
             case GAME_STATUS_INIT:
                 state.status = GAME_STATUS_RUN;
                 _start_state();
             case GAME_STATUS_RUN:{
-//                printf("\ndetect keypress at %d\n",state.time);
                 presshold = 1;
 
                 // set its to jump
@@ -202,14 +205,15 @@ void _check_key_down() {
                 break;
             }
             case GAME_STATUS_OVER:
-                // try to restart game here
-                _reset_state();
+                // try to restart game here, must release+press
+                if(!lastkeystate)
+                    _reset_state();
                 break;
             default:
                 break;
         }
     }
-
+    lastkeystate=keystate;
 }
 
 void _add_render_object(RenderObject *p_render_object) {
