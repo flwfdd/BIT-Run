@@ -148,7 +148,7 @@ void _init_image(pImage p_image) {
     char*p = (char*)p_image->a_mask;
     for (int i = 0; i < bmp.bmHeight; ++i) {
         for (int j = 0; j < bmp.bmWidth; ++j) {
-            COLORREF color = GetPixel(p_image->h_dc,i,j);
+            COLORREF color = GetPixel(p_image->h_dc,j,i);
             if(color==p_image->mask_color)
                 *p = 0;
             else

@@ -36,6 +36,7 @@ DWORD _refresh_interval_thread(LPVOID lpParam) {
     // temp no change to here
     while(thread_live==1){
 //        putchar('.');
+//        printf("tick:%lld\n",game_ms);
         _check_key_down();
 
         SetEvent(p_render_buffer_event);

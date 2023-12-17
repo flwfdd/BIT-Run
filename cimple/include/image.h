@@ -15,8 +15,6 @@ typedef struct Image {
     int mask_color;
     HANDLE h_dc;
     HANDLE h_bmp;
-    int* a_mask;
+    char* a_mask;
 } Image,*pImage;
-
-
 #endif //BIT_RUN_IMAGE_H

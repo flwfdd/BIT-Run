@@ -38,6 +38,7 @@ void _check_key_down();
 
 
 int _check_obj_in_window(RenderObject *p_render_object);
+int _check_obj_overlap(RenderObject*p_obj1,RenderObject*p_obj2);
 
 
 #endif //BIT_RUN_SPRITE_H

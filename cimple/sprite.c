@@ -55,7 +55,9 @@ void _init_state() {
             .vx = 0,
             .vy = 0,
             .phsx = 0,
-            .phsy = GOOSE_INITIAL_Y
+            .phsy = GOOSE_INITIAL_Y,
+            .lasttstp = state.time
+
     };
 
     RenderObject Bkg1= {
@@ -67,7 +69,8 @@ void _init_state() {
             .vx = state.global_vx,
             .vy = 0,
             .phsx = 0,
-            .phsy = 0
+            .phsy = 0,
+            .lasttstp = state.time
     };
 
     RenderObject Bkg2= {
@@ -79,7 +82,8 @@ void _init_state() {
             .vx = state.global_vx,
             .vy = 0,
             .phsx = WINDOW_WIDTH,
-            .phsy = 0
+            .phsy = 0,
+            .lasttstp = state.time
     };
 
     _add_render_object(&Goose);
@@ -91,8 +95,23 @@ void _init_state() {
 
 }
 
+void _reset_state(){
+    free(state.a_p_render_object);
+    _init_state();
+}
+
+
+void _start_state(){
+    // align the timestamp
+    for(int i=0;i<state.render_object_size;i++){
+        state.a_p_render_object[i].lasttstp = state.time;
+    }
+}
+
 void _state_update(){
     int collide = 0;
+    if(state.status!=GAME_STATUS_RUN)
+        return;
     // update all object state
     for (int i = 0; i < state.render_object_size; ++i) {
         if((collide=_update_render_object(&state.a_p_render_object[i])))
@@ -106,7 +125,7 @@ void _state_update(){
 
     // here we can add more obstacles according to current state
 
-    if(state.render_object_size<=3){
+    if(!collide&&state.render_object_size<=3){
         RenderObject debugtower1 = {
                 .obj_id = OBJ_DEBUG1,
                 .x = WINDOW_WIDTH,
@@ -159,6 +178,7 @@ void _check_key_down() {
         switch (state.status) {
             case GAME_STATUS_INIT:
                 state.status = GAME_STATUS_RUN;
+                _start_state();
             case GAME_STATUS_RUN:{
 //                printf("\ndetect keypress at %d\n",state.time);
                 presshold = 1;
@@ -183,7 +203,7 @@ void _check_key_down() {
             }
             case GAME_STATUS_OVER:
                 // try to restart game here
-                state.status = GAME_STATUS_INIT;
+                _reset_state();
                 break;
             default:
                 break;
@@ -224,10 +244,10 @@ void _update_render_list(int isOver) {
     RenderObject* pRobj = state.a_p_render_object;
     RenderObject* newList = NULL;
 
-    // if its over , just put a score show board in the render list
+    // if its over , append a score show board in the render list
     if(isOver){
         // make the a_p_render_object be a score and game over board
-        // _add_score_board()
+        // _add_score_board() guarantee the score is last element
         return;
     }
 
@@ -285,9 +305,14 @@ int _update_render_object(RenderObject *p_robj) {
 
     if(p_robj->obj_id==OBJ_BKG){
         assert(p_robj->p_image->w==WINDOW_WIDTH);
+//        printf("moving background:%f\n",p_robj->phsx );
+        if(p_robj->x+p_robj->p_image->w<-1000){
+            int a=1;
+        }
         if(p_robj->x+p_robj->p_image->w<=0){
             p_robj->x    += 2*p_robj->p_image->w;
             p_robj->phsx += 2*p_robj->p_image->w;
+        }else{
         }
     }
     return 0;
@@ -295,7 +320,18 @@ int _update_render_object(RenderObject *p_robj) {
 }
 
 int _update_goose(RenderObject *p_goose){
-    //TODO: collide detect
+
+    // check collision
+    int iscollide=0;
+    RenderObject *p_robj = state.a_p_render_object;
+    for (int i = 0; i < state.render_object_size; ++i,p_robj++) {
+        if(p_robj->obj_id==OBJ_GOOSE||p_robj->obj_id==OBJ_BKG)
+            continue;
+        if(_check_obj_overlap(p_goose,p_robj)){
+            printf("detect collision!\n");
+            iscollide = 1;
+        }
+    }
 
     if(!jumping){
         if(state.time&0x10)
@@ -338,9 +374,10 @@ int _update_goose(RenderObject *p_goose){
         }
     }
 
+
     p_goose->lasttstp = state.time;
 
-    return 0;
+    return iscollide;
 }
 
 int _check_obj_in_window(RenderObject *p_render_object) {
@@ -348,4 +385,93 @@ int _check_obj_in_window(RenderObject *p_render_object) {
         return 0;
     else
         return 1; // return 1 for test
+}
+
+//  Debugging
+void DrawRectOutline(HDC hdc, RECT rect) {
+    // 创建画笔
+    HPEN hPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));  // 红色画笔
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+
+    // 绘制边框
+    MoveToEx(hdc, rect.left, rect.top, NULL);
+    LineTo(hdc, rect.right, rect.top);
+    LineTo(hdc, rect.right, rect.bottom);
+    LineTo(hdc, rect.left, rect.bottom);
+    LineTo(hdc, rect.left, rect.top);
+
+    // 清理资源
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+}
+extern HANDLE h_window_main;
+
+int _check_obj_overlap(RenderObject *p_obj1, RenderObject *p_obj2) {
+    Image* p_image1 = p_obj1->p_image;
+    Image* p_image2 = p_obj2->p_image;
+    RECT obj1_rect, obj2_rect, overlap_rect;
+
+    // 快速判断矩形框是否重叠
+    // 1完全在2左侧
+    obj1_rect.left  = p_obj1->x;
+    obj1_rect.right = p_obj1->x + p_image1->w - 1; // Adjusted index
+    if (obj1_rect.right <= p_obj2->x) {
+        return 0;
+    }
+    // 1完全在2右侧
+    obj2_rect.left  = p_obj2->x;
+    obj2_rect.right = p_obj2->x + p_image2->w - 1; // Adjusted index
+    if (obj2_rect.right <= p_obj1->x) {
+        return 0;
+    }
+    // 1完全在2下方
+    obj1_rect.bottom = p_obj1->y;
+    obj1_rect.top    =  p_obj1->y + p_image1->h - 1; // Adjusted index
+    if (obj1_rect.top <= p_obj2->y) {
+        return 0;
+    }
+    // 1完全在2上方
+    obj2_rect.bottom = p_obj2->y;
+    obj2_rect.top    = p_obj2->y + p_image2->h - 1; // Adjusted index
+    if (obj2_rect.top <= p_obj1->y) {
+        return 0;
+    }
+
+    // 计算交叉区域
+    overlap_rect.left   = obj1_rect.left   > obj2_rect.left   ? obj1_rect.left   : obj2_rect.left;
+    overlap_rect.right  = obj1_rect.right  < obj2_rect.right  ? obj1_rect.right  : obj2_rect.right;
+    overlap_rect.bottom = obj1_rect.bottom > obj2_rect.bottom ? obj1_rect.bottom : obj2_rect.bottom;
+    overlap_rect.top    = obj1_rect.top    < obj2_rect.top    ? obj1_rect.top    : obj2_rect.top;
+
+    //DEBUG
+    HDC hdc = GetDC(h_window_main);
+    DrawRectOutline(hdc, overlap_rect);
+    DrawRectOutline(hdc, obj1_rect);
+    DrawRectOutline(hdc, obj2_rect);
+
+    // 像素判断是否有交叉区域
+    for (int esi_val = overlap_rect.top; esi_val >= overlap_rect.bottom; esi_val--) {
+        for (int edi_val = overlap_rect.left; edi_val < overlap_rect.right; edi_val++) {
+            int obj1_row_index = obj1_rect.top - esi_val;
+            int obj1_col_index = edi_val - obj1_rect.left;
+            int obj1_offset    = obj1_row_index * p_image1->w + obj1_col_index;
+            char* obj1_mask    = p_image1->a_mask;
+
+            if (obj1_mask[obj1_offset] == 0) {
+                continue;
+            }
+
+            int obj2_row_index = obj2_rect.top - esi_val;
+            int obj2_col_index = edi_val - obj2_rect.left;
+            int obj2_offset    = obj2_row_index * p_image2->w + obj2_col_index;
+            char* obj2_mask    = p_image2->a_mask;
+            if (obj2_mask[obj2_offset] == 0) {
+                continue;
+            }
+
+            return  1;
+        }
+    }
+
+    return 0;
 }
