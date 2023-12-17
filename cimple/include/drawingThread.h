@@ -19,6 +19,7 @@ void _render_window();
 #define OBJ_DEBUG1 1
 #define OBJ_DEBUG2 2
 #define OBJ_DEBUG3 3
+#define OBJ_BKG    4
 #define OBJ_NONE 42
 
  typedef struct RenderObject{
@@ -36,5 +37,6 @@ void _render_window();
 
 
  } RenderObject ;
+
 
 #endif //BIT_RUN_DRAWINGTHREAD_H

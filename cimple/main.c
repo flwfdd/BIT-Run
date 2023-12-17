@@ -4,7 +4,7 @@
 
 #include "windows.h"
 #include "BIT_run.h"
-#include "spirits.h"
+#include "sprite.h"
 #include "lifecycle.h"
 #include "winuser.h"
 //#include "shellscalingapi.h"
@@ -86,9 +86,6 @@ LRESULT CALLBACK _main_window_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
     switch (msg) {
         case WM_CREATE:
             _init();
-            break;
-        case WM_KEYDOWN:
-            _key_down(wParam,lParam);
             break;
         case WM_CLOSE:
             _close();

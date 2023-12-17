@@ -19,7 +19,7 @@
 #define JUMPVY 800.0
 
 #define G      1530.0
-#define JG     1500
+#define JG     500
 
 
 #define RENDER_OBJECT_SIZE 16  // 16 may enough

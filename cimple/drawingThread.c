@@ -7,7 +7,7 @@
 #include "drawingThread.h"
 #include "BIT_run.h"
 #include "image.h"
-#include "spirits.h"
+#include "sprite.h"
 
 extern
 HWND      h_window_main;
@@ -36,6 +36,8 @@ DWORD _refresh_interval_thread(LPVOID lpParam) {
     // temp no change to here
     while(thread_live==1){
 //        putchar('.');
+        _check_key_down();
+
         SetEvent(p_render_buffer_event);
         Sleep(1000/FPS);
         game_ms+=1000/FPS;
@@ -87,11 +89,37 @@ void _render_buffer() {
         }
     }
 
+
+
+    // paint bkg first
+    for (int i = 0; i < state.render_object_size; ++i) {
+        RenderObject* p_render_object = state.a_p_render_object+i;
+        if(p_render_object->obj_id!=OBJ_BKG)
+            continue;
+        Image*        p_image = p_render_object->p_image;
+        assert(p_image!=NULL);
+        TransparentBlt(
+                ha_buffer_dc[indx],
+                p_render_object->x,
+                WINDOW_HEIGHT-p_image->h-p_render_object->y,
+                p_image->w,
+                p_image->h,
+                p_image->h_dc,
+                0,0,
+                p_image->w,
+                p_image->h,
+                p_image->mask_color
+        );
+    }
+
     // loop to paint all image
     for (int i = 0; i < state.render_object_size; ++i) {
         RenderObject* p_render_object = state.a_p_render_object+i;
+        if(p_render_object->obj_id==OBJ_BKG)
+            continue;
         Image*        p_image = p_render_object->p_image;
         assert(p_image!=NULL);
+
         TransparentBlt(
                 ha_buffer_dc[indx],
                 p_render_object->x,

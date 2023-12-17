@@ -7,7 +7,7 @@
 #include "drawingThread.h"
 #include "BIT_run.h"
 #include "image.h"
-#include "spirits.h"
+#include "sprite.h"
 
 
 // event handle here

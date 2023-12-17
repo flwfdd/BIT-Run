@@ -2,8 +2,8 @@
 // Created by no3core on 2023/12/15.
 //
 
-#ifndef BIT_RUN_SPIRITS_H
-#define BIT_RUN_SPIRITS_H
+#ifndef BIT_RUN_SPRITE_H
+#define BIT_RUN_SPRITE_H
 #include "windows.h"
 #include "drawingThread.h"
 
@@ -27,19 +27,17 @@ typedef struct GameState{
 
 void _init_state();
 void _add_render_object(RenderObject *p_render_object);
-void _update_render_object(RenderObject* p_robj);
+int _update_render_object(RenderObject* p_robj);
 
-void _update_render_list();
-void _update_goose(RenderObject* p_render_object);
-
-
+void _update_render_list(int isOver);
+int _update_goose(RenderObject* p_goose);
 
 
 void _state_update();
-void _key_down(WPARAM wParam, LPARAM lParam);
+void _check_key_down();
 
 
 int _check_obj_in_window(RenderObject *p_render_object);
 
 
-#endif //BIT_RUN_SPIRITS_H
+#endif //BIT_RUN_SPRITE_H

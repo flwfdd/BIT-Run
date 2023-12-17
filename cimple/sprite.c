@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "spirits.h"
+#include "sprite.h"
 #include "lifecycle.h"
 #include "BIT_run.h"
 
@@ -57,20 +57,52 @@ void _init_state() {
             .phsx = 0,
             .phsy = GOOSE_INITIAL_Y
     };
+
+    RenderObject Bkg1= {
+            .obj_id = OBJ_BKG,
+            .x = 0,
+            .y = 0,
+            .z = 0,
+            .p_image = _get_image("./image/back_ground.bmp"),
+            .vx = state.global_vx,
+            .vy = 0,
+            .phsx = 0,
+            .phsy = 0
+    };
+
+    RenderObject Bkg2= {
+            .obj_id = OBJ_BKG,
+            .x = WINDOW_WIDTH,
+            .y = 0,
+            .z = 0,
+            .p_image = _get_image("./image/back_ground.bmp"),
+            .vx = state.global_vx,
+            .vy = 0,
+            .phsx = WINDOW_WIDTH,
+            .phsy = 0
+    };
+
     _add_render_object(&Goose);
+    _add_render_object(&Bkg1);
+    _add_render_object(&Bkg2);
+
 
     jumping = 0;
 
 }
 
 void _state_update(){
+    int collide = 0;
     // update all object state
     for (int i = 0; i < state.render_object_size; ++i) {
-        _update_render_object(&state.a_p_render_object[i]);
+        if((collide=_update_render_object(&state.a_p_render_object[i])))
+            break;
     }
 
-    // remove those may outbound object
-    _update_render_list();
+    if(collide) state.status = GAME_STATUS_OVER;
+
+    // remove those may outbound object or draw the final score
+    _update_render_list(collide);
 
     // here we can add more obstacles according to current state
 
@@ -95,7 +127,7 @@ void _state_update(){
                 .y = HORIZON_HEIGHT,
                 .z = 1,
                 .p_image = _get_image("./image/tower25x50.bmp"),
-                .vx = state.global_vx,
+                .vx = state.global_vx-20,
                 .vy = 0,
                 .phsx = WINDOW_WIDTH+100,
                 .phsy = HORIZON_HEIGHT,
@@ -122,20 +154,20 @@ void _state_update(){
 }
 
 
-void _key_down(WPARAM wParam, LPARAM lParam) {
-    if(wParam==VK_SPACE){
+void _check_key_down() {
+    if(GetAsyncKeyState(VK_SPACE)){
         switch (state.status) {
             case GAME_STATUS_INIT:
                 state.status = GAME_STATUS_RUN;
             case GAME_STATUS_RUN:{
-                printf("\ndetect keypress\n");
+//                printf("\ndetect keypress at %d\n",state.time);
                 presshold = 1;
 
                 // set its to jump
                 if(jumping==0){
                     RenderObject*pGoose;
                     jumping = 1;
-                    printf("goose jumpped!\n");
+//                    printf("goose jumpped! at %d\n",state.time);
                     for (int i = 0; i < state.render_object_size; ++i) {
                         if(state.a_p_render_object[i].obj_id==OBJ_GOOSE){
                             pGoose = &state.a_p_render_object[i];
@@ -145,11 +177,12 @@ void _key_down(WPARAM wParam, LPARAM lParam) {
                         }
                     }
                 } else{
-                    printf("goose is jumpping,add more jump!\n");
+//                    printf("goose is jumpping,add more jump! at %d\n",state.time);
                 }
                 break;
             }
             case GAME_STATUS_OVER:
+                // try to restart game here
                 state.status = GAME_STATUS_INIT;
                 break;
             default:
@@ -186,15 +219,25 @@ void _add_render_object(RenderObject *p_render_object) {
 
 }
 
-void _update_render_list(){
+void _update_render_list(int isOver) {
 
     RenderObject* pRobj = state.a_p_render_object;
     RenderObject* newList = NULL;
+
+    // if its over , just put a score show board in the render list
+    if(isOver){
+        // make the a_p_render_object be a score and game over board
+        // _add_score_board()
+        return;
+    }
+
 
     // check in window
     for(int i=0;i<state.render_object_size;i++,pRobj++){
         assert(pRobj->p_image!=NULL);
         if(!_check_obj_in_window(pRobj)){
+            // cannot trigger this when bkg is out
+            assert(pRobj->obj_id!=OBJ_BKG);
             newList = malloc(sizeof(RenderObject)*RENDER_OBJECT_SIZE);
             _init_render_list(newList);
             break;
@@ -221,10 +264,13 @@ void _update_render_list(){
     }
 }
 
-void _update_render_object(RenderObject *p_robj) {
+// return 1 if goose collide 0 if no thing happened
+int _update_render_object(RenderObject *p_robj) {
     if(p_robj->obj_id == OBJ_GOOSE){
-        _update_goose(p_robj);
-    }else{
+        // special handle for goose
+        return _update_goose(p_robj);
+    } else{
+        // handle normal object
         int deltat = state.time - p_robj->lasttstp;
         float fdeltat = 0.001*deltat;
 
@@ -237,9 +283,19 @@ void _update_render_object(RenderObject *p_robj) {
         p_robj->lasttstp = state.time;
     }
 
+    if(p_robj->obj_id==OBJ_BKG){
+        assert(p_robj->p_image->w==WINDOW_WIDTH);
+        if(p_robj->x+p_robj->p_image->w<=0){
+            p_robj->x    += 2*p_robj->p_image->w;
+            p_robj->phsx += 2*p_robj->p_image->w;
+        }
+    }
+    return 0;
+
 }
 
-void _update_goose(RenderObject *p_goose){
+int _update_goose(RenderObject *p_goose){
+    //TODO: collide detect
 
     if(!jumping){
         if(state.time&0x10)
@@ -256,9 +312,10 @@ void _update_goose(RenderObject *p_goose){
         float accer  = (presshold)?(G-JG):G;
         if(presshold) presshold = 0;
 //        if(presshold){
-//            printf("detect long jump\n");
+//            printf("%d:detect long jump\n",state.time);
+//            presshold = 0;
 //        } else{
-//            printf("no long jump\n");
+//            printf("%d:no long jump\n",state.time);
 //        }
 
         p_goose->phsy = p_goose->phsy + p_goose->vy*fdelta - 0.5*accer*fdelta*fdelta;
@@ -272,7 +329,7 @@ void _update_goose(RenderObject *p_goose){
 
         // check if it is on the ground
         if(p_goose->phsy<=HORIZON_HEIGHT){
-            printf("goose onground!\n");
+//            printf("goose onground!\n");
             jumping = 0;
             p_goose->y = GOOSE_INITIAL_Y;
             p_goose->phsy = GOOSE_INITIAL_Y;
@@ -282,6 +339,8 @@ void _update_goose(RenderObject *p_goose){
     }
 
     p_goose->lasttstp = state.time;
+
+    return 0;
 }
 
 int _check_obj_in_window(RenderObject *p_render_object) {
