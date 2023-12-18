@@ -54,15 +54,15 @@ _check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
 
 	; 判断是否在窗口内
     ; 右
-	.if [esi + RenderObject.x] >= WINDOW_WIDTH
-		xor eax, eax
-		ret
-    .endif
+	;.if [esi + RenderObject.x] >= WINDOW_WIDTH
+	;	xor eax, eax
+	;	ret
+    ;.endif
     ; 上
-    .if [esi + RenderObject.y] >= WINDOW_HEIGHT
-		xor eax, eax
-		ret
-	.endif
+    ;.if [esi + RenderObject.y] >= WINDOW_HEIGHT
+	;	xor eax, eax
+	;	ret
+	;.endif
     ; 左
 	mov eax, [esi + RenderObject.x]
 	add eax, [ecx + Image.w]
@@ -71,12 +71,12 @@ _check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
 		ret
 	.endif
     ; 下
-	mov eax, [esi + RenderObject.y]
-	add eax, [ecx + Image.h]
-	.if eax <= 0
-		xor eax, eax
-		ret
-	.endif
+	;mov eax, [esi + RenderObject.y]
+	;add eax, [ecx + Image.h]
+	;.if eax <= 0
+	;	xor eax, eax
+	;	ret
+	;.endif
 
 	mov eax, 1
 	ret
@@ -237,7 +237,7 @@ _render_buffer PROC uses ebx esi edi
     invoke PatBlt, $a_buffer_dc[4*ebx], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, PATCOPY
     ; 释放画刷
     invoke DeleteObject, esi
-    
+
 
     ; 渲染对象
     mov esi, 0 ; 渲染对象索引
@@ -256,7 +256,7 @@ _render_buffer PROC uses ebx esi edi
         sub edx, [edi + RenderObject.y]
         sub edx, [eax + Image.h]
         invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
-		
+
 		inc esi
         add edi, sizeof RenderObject
     .endw

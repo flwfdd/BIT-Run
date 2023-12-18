@@ -17,6 +17,7 @@ int buffer_index = 0;
 HDC ha_buffer_dc[BUFFER_SIZE];
 HBITMAP ha_buffer_bmp[BUFFER_SIZE];
 
+// load all image rsrc
 Image*p_a_image;
 
 // thread & event control
@@ -89,8 +90,6 @@ void _render_buffer() {
             SetPixel(ha_buffer_dc[indx],i+indx,j,0x00FF00);
         }
     }
-
-
 
     // paint bkg first
     for (int i = 0; i < state.render_object_size; ++i) {

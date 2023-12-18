@@ -19,7 +19,7 @@ typedef struct GameState{
     int render_object_size;
     RenderObject* a_p_render_object;
 
-    int global_vx;
+    float global_vx;
 } GameState;
 
 
@@ -27,6 +27,7 @@ typedef struct GameState{
 
 void _init_state();
 void _add_render_object(RenderObject *p_render_object);
+void _init_render_list(RenderObject* p_rlist);
 int _update_render_object(RenderObject* p_robj);
 
 void _update_render_list(int isOver);

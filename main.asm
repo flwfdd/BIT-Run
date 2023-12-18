@@ -25,7 +25,9 @@ _render_buffer PROTO ; 渲染缓冲区
 _render_window PROTO ; 渲染缓冲区到窗口
 
 ; 状态模块
+_init_state   PROTO ; 初始化状态模块
 _state_update PROTO ; 状态更新
+_check_key_down PROTO;检测按键并更新状态
 
 public $h_instance, $h_window_main, $state
 
@@ -87,6 +89,8 @@ _refresh_interval_thread PROC
             mov eax, dword ptr @time1
 			mov $state.time, eax
 
+            ; 检测按键输入
+            invoke _check_key_down
             ; 通知渲染缓冲区
             invoke SetEvent, $p_render_buffer_event
         .endif
@@ -140,6 +144,8 @@ _init PROC
 
     ; 初始化渲染模块
     invoke _init_render
+    ; 初始化游戏状态
+    invoke _init_state
 
     ; 启动线程
     mov $thread_live, 1
@@ -149,10 +155,6 @@ _init PROC
     ret
 _init ENDP
 
-; 用户操作回调
-_key_down PROC @key
-    ret
-_key_down ENDP
 
 ; 关闭回调
 _close PROC
@@ -161,6 +163,8 @@ _close PROC
 
     ; 释放渲染模块
     invoke _free_render
+
+    ; 可能需要一个释放状态的
 
     ; 释放事件
     invoke CloseHandle, $p_render_window_event
@@ -179,8 +183,6 @@ _main_window_proc PROC @h_instance, @msg, @wParam, @lParam
     mov eax, @msg
     .if eax == WM_CREATE
         invoke _init
-    .elseif eax == WM_KEYDOWN
-        invoke _key_down, @wParam
     .elseif eax == WM_CLOSE
         invoke _close
     .else

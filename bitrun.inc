@@ -5,6 +5,21 @@ WINDOW_HEIGHT EQU 500 ; 窗口高度
 BUFFER_SIZE EQU 24 ; 缓冲大小
 FPS EQU 50 ; 帧率
 
+HORIZON_HEIGHT EQU 188; 地面y坐标
+GOOSE_INITIAL_X EQU 100 ;鹅初始x坐标
+GOOSE_INITIAL_Y EQU HORIZON_HEIGHT ;鹅初始y坐标
+GOOSE_INTERVAL  EQU 10h  ;鹅走动间隔
+
+; 这里定义都使用整数而不是浮点数
+GINIT_VX EQU 400      ; 全局x方向速度
+JUMP_VY  EQU 800      ; 鹅初始弹跳速度
+
+G EQU 1530  ; 游戏内部重力加速度
+JUMPA EQU 500 ; 弹跳辅助加速度
+
+RENDER_OBJ_SIZE EQU BUFFER_SIZE ;绘制集合大小
+
+
 ; 图片结构体
 Image STRUCT
     id DWORD ? ; 资源ID
@@ -18,11 +33,29 @@ Image ENDS
 
 ; 绘制元素结构体
 RenderObject STRUCT
+    obj_id DWORD ? ; 元素的ID
     x DWORD ? ; 画布上的X坐标
     y DWORD ? ; 画布上的Y坐标
     z DWORD ? ; 优先级 大的在上面
     p_image DWORD ? ; 图片指针
+
+    vx REAL4 ? ; 元素X方向速度
+    vy REAL4 ? ; 元素Y方向速度
+    phsx REAL4 ? ; 元素物理X坐标
+    phsy REAL4 ? ; 元素物理Y坐标
+    lasttsp DWORD ?; 元素最近更新的时间 单位毫秒
 RenderObject ENDS
+
+; 绘制元素ID
+OBJ_NONE EQU 0  ;空
+OBJ_BKG  EQU 1  ;背景
+OBJ_GOOSE EQU 2 
+OBJ_BIRD  EQU 3
+OBJ_BADGE EQU 4
+OBJ_OBSTACLE1 EQU 5
+OBJ_OBSTACLE2 EQU 6
+OBJ_DEBUG1    EQU 7
+
 
 ; 游戏状态
 GAME_STATUS_INIT EQU 0 ; 未开始
@@ -37,6 +70,8 @@ GameState STRUCT
     background_color DWORD ? ; 背景颜色
     render_object_size DWORD ? ; 绘制元素数量
     p_a_render_object DWORD ? ; 指向绘制元素数组的指针 数组中每个元素是RenderObject结构体
+
+    global_vx REAL4 ? ; 整体速度（左移为负）
 GameState ENDS
 
 
@@ -60,6 +95,10 @@ IMAGE_BIRD0_ID DWORD 301
 IMAGE_BIRD0_MASK_COLOR DWORD 000000h
 IMAGE_BIRD1_ID DWORD 302
 IMAGE_BIRD1_MASK_COLOR DWORD 000000h
+
+
+IMAGE_BACKGROUND_ID DWORD 666
+
 
 IMAGES_END EQU $ ; 结束标记
 

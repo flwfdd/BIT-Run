@@ -12,29 +12,11 @@ GameState state;
 
 // goose state
 int jumping;
-int presshold;
-
-//#define OBJ_BKG   0
-
-void _init_render_list(RenderObject*p_a_rlist){
-    // use rtlzero instead here please
-    for(int i=0;i<RENDER_OBJECT_SIZE;i++){
-        p_a_rlist[i].x = 0;
-        p_a_rlist[i].y = 0;
-        p_a_rlist[i].z = 0;
-        p_a_rlist[i].p_image = NULL;
-        p_a_rlist[i].obj_id = OBJ_NONE;
-        p_a_rlist[i].vx = 0;
-        p_a_rlist[i].vy = 0;
-        p_a_rlist[i].phsy = 0;
-        p_a_rlist[i].phsx = 0;
-        p_a_rlist[i].lasttstp = 0;
-    }
-}
-
+SHORT lastkeystate;
 
 void _init_state() {
-    presshold = 0;
+    lastkeystate = 0;
+    jumping = 0;
     state.score = 0;
     state.status = GAME_STATUS_INIT;
     state.global_vx = -GINITVX;
@@ -90,16 +72,12 @@ void _init_state() {
     _add_render_object(&Bkg1);
     _add_render_object(&Bkg2);
 
-
-    jumping = 0;
-
 }
 
 void _reset_state(){
     free(state.a_p_render_object);
     _init_state();
 }
-
 
 void _start_state(){
     // align the timestamp
@@ -172,25 +150,19 @@ void _state_update(){
     }
 }
 
-
-SHORT lastkeystate;
 void _check_key_down() {
     SHORT keystate;
     if((keystate=GetAsyncKeyState(VK_SPACE))){
         printf("detect keypress at %d\n",state.time);
-
         switch (state.status) {
             case GAME_STATUS_INIT:
                 state.status = GAME_STATUS_RUN;
                 _start_state();
             case GAME_STATUS_RUN:{
-                presshold = 1;
-
                 // set its to jump
                 if(jumping==0){
                     RenderObject*pGoose;
                     jumping = 1;
-//                    printf("goose jumpped! at %d\n",state.time);
                     for (int i = 0; i < state.render_object_size; ++i) {
                         if(state.a_p_render_object[i].obj_id==OBJ_GOOSE){
                             pGoose = &state.a_p_render_object[i];
@@ -199,8 +171,6 @@ void _check_key_down() {
                             break;
                         }
                     }
-                } else{
-//                    printf("goose is jumpping,add more jump! at %d\n",state.time);
                 }
                 break;
             }
@@ -216,31 +186,9 @@ void _check_key_down() {
     lastkeystate=keystate;
 }
 
-void _add_render_object(RenderObject *p_render_object) {
-    // find a slots in the render object list
-    // and add to its
-    RenderObject* pRobj = state.a_p_render_object;
-    int i;
-    for( i=0;i<RENDER_OBJECT_SIZE;i++){
-        if(pRobj->p_image==NULL){
-            pRobj->obj_id = p_render_object->obj_id;
-            pRobj->x = p_render_object->x;
-            pRobj->y = p_render_object->y;
-            pRobj->phsx = p_render_object->phsx;
-            pRobj->phsy = p_render_object->phsy;
-            pRobj->z = p_render_object->z;
-            pRobj->vx = p_render_object->vx;
-            pRobj->vy = p_render_object->vy;
-            pRobj->p_image = p_render_object->p_image;
-            pRobj->lasttstp = p_render_object->lasttstp;
-
-            state.render_object_size++;
-            break;
-        }
-        pRobj++;
-    }
-    assert(i!=RENDER_OBJECT_SIZE);
-
+void _init_render_list(RenderObject*p_a_rlist){
+    // use rtlzero instead here please
+    RtlZeroMemory(p_a_rlist,RENDER_OBJECT_SIZE*sizeof(RenderObject));
 }
 
 void _update_render_list(int isOver) {
@@ -254,7 +202,6 @@ void _update_render_list(int isOver) {
         // _add_score_board() guarantee the score is last element
         return;
     }
-
 
     // check in window
     for(int i=0;i<state.render_object_size;i++,pRobj++){
@@ -288,6 +235,23 @@ void _update_render_list(int isOver) {
     }
 }
 
+void _add_render_object(RenderObject *p_render_object) {
+    // find a slots in the render object list
+    // and add to its
+    RenderObject* pRobj = state.a_p_render_object;
+    int i;
+    for( i=0;i<RENDER_OBJECT_SIZE;i++){
+        if(pRobj->p_image==NULL){
+            memcpy(pRobj,p_render_object,sizeof(RenderObject));
+            state.render_object_size++;
+            break;
+        }
+        pRobj++;
+    }
+    assert(i!=RENDER_OBJECT_SIZE);
+
+}
+
 // return 1 if goose collide 0 if no thing happened
 int _update_render_object(RenderObject *p_robj) {
     if(p_robj->obj_id == OBJ_GOOSE){
@@ -309,14 +273,9 @@ int _update_render_object(RenderObject *p_robj) {
 
     if(p_robj->obj_id==OBJ_BKG){
         assert(p_robj->p_image->w==WINDOW_WIDTH);
-//        printf("moving background:%f\n",p_robj->phsx );
-        if(p_robj->x+p_robj->p_image->w<-1000){
-            int a=1;
-        }
         if(p_robj->x+p_robj->p_image->w<=0){
             p_robj->x    += 2*p_robj->p_image->w;
             p_robj->phsx += 2*p_robj->p_image->w;
-        }else{
         }
     }
     return 0;
@@ -338,38 +297,24 @@ int _update_goose(RenderObject *p_goose){
     }
 
     if(!jumping){
-        if(state.time&0x10)
+        if(state.time&GOOSE_INTERVAL)
             p_goose->p_image = _get_image("./image/goose_run0.bmp");
          else
             p_goose->p_image = _get_image("./image/goose_run1.bmp");
 
     } else{
-
         int deltat = state.time - p_goose->lasttstp;
         // motion calculate
         float fdelta = 0.001*deltat;
-
-        float accer  = (presshold)?(G-JG):G;
-        if(presshold) presshold = 0;
-//        if(presshold){
-//            printf("%d:detect long jump\n",state.time);
-//            presshold = 0;
-//        } else{
-//            printf("%d:no long jump\n",state.time);
-//        }
-
+        float accer  = (lastkeystate)?(G-JG):G;
         p_goose->phsy = p_goose->phsy + p_goose->vy*fdelta - 0.5*accer*fdelta*fdelta;
         p_goose->vy = p_goose->vy - accer*fdelta;
-
 
         // discrete the px location
         p_goose->y = (int)p_goose->phsy;
 
-//        printf("goose state update y:%f vy:%f at %d ms\n",p_goose->phsy,p_goose->vy,state.time);
-
         // check if it is on the ground
         if(p_goose->phsy<=HORIZON_HEIGHT){
-//            printf("goose onground!\n");
             jumping = 0;
             p_goose->y = GOOSE_INITIAL_Y;
             p_goose->phsy = GOOSE_INITIAL_Y;
