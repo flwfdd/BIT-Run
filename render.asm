@@ -47,7 +47,7 @@ _rgb2bgr PROC uses ebx esi edi @rgb:DWORD
 _rgb2bgr ENDP
 
 ; 判断是否在窗口内 输入RenderObject指针 输出是否在窗口内
-_check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
+_check_obj_in_window PROC uses ebx esi edi ecx @p_obj:DWORD
 	; 获取图像指针
 	mov esi, @p_obj
     mov ecx, [esi + RenderObject.p_image]
@@ -66,10 +66,11 @@ _check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
     ; 左
 	mov eax, [esi + RenderObject.x]
 	add eax, [ecx + Image.w]
-	.if eax <= 0
+    cmp eax,0
+    jg @label1_c_o_i_w
 		xor eax, eax
 		ret
-	.endif
+    @label1_c_o_i_w:
     ; 下
 	;mov eax, [esi + RenderObject.y]
 	;add eax, [ecx + Image.h]
@@ -83,7 +84,7 @@ _check_obj_in_window PROC uses ebx esi edi @p_obj:DWORD
 _check_obj_in_window ENDP
 
 ; 判断是否碰撞 输入两个RenderObject指针 输出是否碰撞
-_check_obj_overlap PROC uses ebx esi edi @p_obj1:DWORD, @p_obj2:DWORD
+_check_obj_overlap PROC uses ebx esi edi ecx @p_obj1:DWORD, @p_obj2:DWORD
     local @p_image1:DWORD, @p_image2:DWORD
     local @obj1_rect:RECT, @obj2_rect:RECT, @overlap_rect:RECT
 
@@ -238,19 +239,41 @@ _render_buffer PROC uses ebx esi edi
     ; 释放画刷
     invoke DeleteObject, esi
 
+    ; 这里后续估计得改下
+    ; 首先渲染背景
+    mov esi, 0 ; 渲染对象索引
+    mov edi, $state.p_a_render_object ; 渲染对象地址
+    .while esi < $state.render_object_size
+        .if [edi + RenderObject.obj_id] != OBJ_BKG
+		    inc esi
+            add edi, sizeof RenderObject
+            .continue
+        .endif
+        ; 转换坐标为左下角原点 右上方向为正
+        mov eax, [edi + RenderObject.p_image]
+        mov edx, WINDOW_HEIGHT
+        sub edx, [edi + RenderObject.y]
+        sub edx, [eax + Image.h]
+        invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+
+		inc esi
+        add edi, sizeof RenderObject
+    .endw
+
+
 
     ; 渲染对象
     mov esi, 0 ; 渲染对象索引
     mov edi, $state.p_a_render_object ; 渲染对象地址
     .while esi < $state.render_object_size
-        ; 判断是否在窗口内
-        invoke _check_obj_in_window, edi
-        .if eax == 0
-			inc esi
-			add edi, sizeof RenderObject
-			.continue
+
+        .if [edi + RenderObject.obj_id] == OBJ_BKG
+		    inc esi
+            add edi, sizeof RenderObject
+            .continue
         .endif
         ; 转换坐标为左下角原点 右上方向为正
+
         mov eax, [edi + RenderObject.p_image]
         mov edx, WINDOW_HEIGHT
         sub edx, [edi + RenderObject.y]

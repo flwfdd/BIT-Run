@@ -57,6 +57,12 @@
     <Image Include="image\bird1.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="image\back_ground_test.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\bitmap2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BIT-Run.rc">

@@ -67,6 +67,13 @@ fldI  MACRO IMD
 	pop eax  ; 恢复eax
 ENDM
 
+; 用于快速定义字符串DEBUG
+szText MACRO Name, Text:VARARG
+LOCAL lbl
+	jmp lbl
+	Name db Text,13,10,0
+	lbl:
+ENDM
 
 
 _init_state PROC uses ecx
@@ -79,11 +86,7 @@ _init_state PROC uses ecx
 	mov $state.score, 0
 	mov $state.status,GAME_STATUS_INIT
 	; 加载 global vx
-	finit
-	mov  eax, GINIT_VX
-	push eax
-	fild dword ptr [esp]
-	pop eax
+	fldI GINIT_VX
 	fchs
 	fstp $state.global_vx
 
@@ -108,15 +111,14 @@ _init_state PROC uses ecx
 	invoke _get_image, IMAGE_GOOSE_RUN0_ID
 	mov @Goose.p_image,eax
 
-	finit
 	fldz
 	fstp @Goose.vx
 	fldz
 	fstp @Goose.vy
-	mov eax, GOOSE_INITIAL_Y
-	push eax
-	fild dword ptr [esp]
-	pop eax
+	fldI GOOSE_INITIAL_X
+	fstp @Goose.phsx
+	fldI GOOSE_INITIAL_Y
+	fstp @Goose.phsy
 
 	mov eax,$state.time
 	mov @Goose.lasttsp,eax
@@ -128,10 +130,10 @@ _init_state PROC uses ecx
 	mov @Bkg1.z,0
 	invoke _get_image, IMAGE_BACKGROUND_ID
 	mov @Bkg1.p_image,eax
-	finit
+
 	mov eax, $state.global_vx
 	push eax
-	fild dword ptr [esp]
+	fld dword ptr [esp]
 	fstp @Bkg1.vx
 	pop eax
 	fldz
@@ -153,7 +155,7 @@ _init_state PROC uses ecx
 	finit
 	mov eax, $state.global_vx
 	push eax
-	fild dword ptr [esp]
+	fld dword ptr [esp]
 	fstp @Bkg2.vx
 	pop eax
 	fldz
@@ -164,7 +166,7 @@ _init_state PROC uses ecx
 	fstp @Bkg2.phsx
 	pop eax
 	fldz
-	fstp @Bkg1.phsy
+	fstp @Bkg2.phsy
 	mov eax,$state.time
 	mov @Bkg2.lasttsp,eax
 
@@ -202,6 +204,8 @@ _start_state PROC uses ecx edi edx
 
 _start_state ENDP
 
+
+
 ; 更新状态
 _state_update PROC uses ebx esi
 	local @collide
@@ -209,6 +213,7 @@ _state_update PROC uses ebx esi
 	local @DEBUGbird1:RenderObject
 	local @DEBUGbird2:RenderObject
 	local @DEBUGbird3:RenderObject
+
 
 
 	mov @collide,0
@@ -219,6 +224,7 @@ _state_update PROC uses ebx esi
 
 	; 这里更新所有的对象运动状态，如果发生了碰撞则终止
 	mov esi,$state.p_a_render_object
+	mov ecx,0
 	.while ecx!=$state.render_object_size
 		invoke _update_render_object,esi
 	 	.if eax!=0
@@ -239,6 +245,7 @@ _state_update PROC uses ebx esi
 
 	; 这里编写添加对象的策略，这里仅仅是无限的添加3个鸟
 	; TODO：初始化float成员写个宏还是
+	.if $state.render_object_size <= 3
 
 	mov @DEBUGbird1.obj_id,OBJ_BIRD
 	mov @DEBUGbird1.x,WINDOW_WIDTH
@@ -252,7 +259,7 @@ _state_update PROC uses ebx esi
 	fstp @DEBUGbird1.vy
 	fldI WINDOW_WIDTH
 	fstp @DEBUGbird1.phsx
-	fldI WINDOW_HEIGHT
+	fldI HORIZON_HEIGHT
 	fstp @DEBUGbird1.phsy
 	m2m @DEBUGbird1.lasttsp,$state.time
 
@@ -272,7 +279,7 @@ _state_update PROC uses ebx esi
 	fldI 100
 	faddp st(1),st
 	fstp @DEBUGbird2.phsx
-	fldI WINDOW_HEIGHT
+	fldI HORIZON_HEIGHT
 	fstp @DEBUGbird2.phsy
 	m2m @DEBUGbird2.lasttsp,$state.time
 
@@ -292,7 +299,7 @@ _state_update PROC uses ebx esi
 	fldI 300
 	faddp st(1),st
 	fstp @DEBUGbird3.phsx
-	fldI WINDOW_HEIGHT
+	fldI HORIZON_HEIGHT
 	fstp @DEBUGbird3.phsy
 	m2m @DEBUGbird3.lasttsp,$state.time
 
@@ -302,9 +309,10 @@ _state_update PROC uses ebx esi
 	invoke _add_render_object, addr @DEBUGbird2
 	invoke _add_render_object, addr @DEBUGbird3
 
+	.endif
 
 	
-	ret
+ 	ret
 _state_update ENDP
 
 
@@ -312,58 +320,65 @@ _state_update ENDP
 
 _check_key_down PROC uses ecx edi edx
 	local @keystate:word
-	local @pGoose  :dword
 	invoke GetAsyncKeyState, VK_SPACE
-	.if eax == 0
-		ret
-	.endif
 	mov  @keystate,ax
+	.if eax != 0
+		;DEBUG
+		;szText debugstr1,"detect key pressed"
+		;invoke crt_printf,addr debugstr1
 
-	; 处理各个阶段按下空格的状态更新
-	.if $state.status == GAME_STATUS_INIT
-		mov $state.status,GAME_STATUS_RUN
-		invoke _start_state
-	.endif
-
-	.if $state.status == GAME_STATUS_INIT || $state.status == GAME_STATUS_RUN
-		.if $state_jumping ==0 
-			mov $state_jumping,1
-
-			;遍历绘制列表找到鹅
-			mov ecx,0
-			mov edi, $state.p_a_render_object
-			.while ecx != $state.render_object_size
-				mov edx,[edi+RenderObject.obj_id]
-				.if edx == OBJ_GOOSE
-					mov @pGoose,edi
-
-					finit	
-					mov eax,JUMP_VY
-					push eax
-					fild dword ptr [esi]
-					pop eax
-					fstp [@pGoose+RenderObject.vy]
-
-					invoke _get_image,IMAGE_GOOSE_JUMP_ID
-					mov [@pGoose+RenderObject.p_image],eax
-
-					.break
-				.endif
-				add edi, sizeof RenderObject
-				inc ecx
-			.endw
-
+		; 处理各个阶段按下空格的状态更新
+		.if $state.status == GAME_STATUS_INIT
+			mov $state.status,GAME_STATUS_RUN
+			invoke _start_state
 		.endif
+
+		.if $state.status == GAME_STATUS_INIT || $state.status == GAME_STATUS_RUN
+
+
+			.if $state_jumping ==0 
+				mov $state_jumping,1
+
+				;遍历绘制列表找到鹅
+				mov ecx,0
+				mov edi, $state.p_a_render_object
+				.while ecx != $state.render_object_size
+					mov edx,[edi+RenderObject.obj_id]
+					.if edx == OBJ_GOOSE
+
+						fldI JUMP_VY
+						;fstp [@pGoose+RenderObject.vy]
+						fstp [edi+RenderObject.vy]
+
+						invoke _get_image,IMAGE_GOOSE_JUMP_ID
+						mov [edi+RenderObject.p_image],eax
+
+						.break
+					.endif
+					add edi, sizeof RenderObject
+					inc ecx
+				.endw
+
+			.endif
+		.endif
+
+		.if $state.status == GAME_STATUS_OVER
+			.if $state_keypress == 0
+				invoke _reset_state
+			.endif
+		.endif
+
+	; DEBUG
+	; .else
+	; 	szText debugstr2,"detect no key pressed"
+	; 	invoke crt_printf,addr debugstr2
 	.endif
 
-	.if $state.status == GAME_STATUS_OVER
-		.if $state_keypress != 0
-			invoke _reset_state
-		.endif
-	.endif
 
 	mov cx,@keystate
 	mov $state_keypress,cx
+
+	ret
 
 _check_key_down ENDP
 
@@ -380,12 +395,12 @@ _init_render_list PROC uses ecx @p_a_rlist:DWORD
 _init_render_list ENDP
 
 _update_render_list PROC uses ecx @isOver:DWORD
-	local @pRobj: dword  
+	local @pOldL: dword  
 	local @pNewL: dword
 	local @oldsize:dword   ;绘制列表的大小
 	mov @pNewL,0
 	mov ecx,$state.p_a_render_object
-	mov @pRobj,ecx
+	mov @pOldL,ecx
 
 	mov ecx,$state.render_object_size
 	mov @oldsize,ecx
@@ -397,7 +412,7 @@ _update_render_list PROC uses ecx @isOver:DWORD
 
 	;检查是否有出界的绘制对象，如果有则更新列表
 	mov ecx,0
-	mov esi,@pRobj
+	mov esi,@pOldL
 	.while ecx!=@oldsize
 		invoke _check_obj_in_window, esi
 		.if eax!=0
@@ -416,25 +431,29 @@ _update_render_list PROC uses ecx @isOver:DWORD
 	;将没有出界的物品放入到新的绘制列表中
 	.if @pNewL != 0
 		mov $state.render_object_size,0
+
 		push @pNewL
 		pop  $state.p_a_render_object
 
 		mov ecx,0
-		mov esi,@pRobj
+		mov esi,@pOldL
+
 		.while ecx!=@oldsize
 			invoke _check_obj_in_window,esi
 			.if eax!=0
 				invoke _add_render_object,esi
 			.endif
-			inc ecx
+			inc ecx		
 			add esi,sizeof RenderObject
 		.endw
 
-		invoke crt_free,@pRobj
+		invoke crt_free,@pOldL
 	.endif
 	ret
 _update_render_list ENDP
 
+
+; 这里是根据$state.p_a_render_object 进行添加的
 _add_render_object PROC uses ecx edi esi @p_robj:DWORD
 	mov ecx,0
 	mov edi,$state.p_a_render_object
@@ -520,17 +539,24 @@ _update_render_object PROC uses esi ecx  @p_robj:DWORD
 
 	;处理循环背景图
 	.if [esi+RenderObject.obj_id] == OBJ_BKG
+		mov eax,[esi+RenderObject.x]
 		mov ecx,[esi+RenderObject.p_image]
 		mov ecx,[ecx+Image.w]
-		add ecx,ecx
+		add eax,ecx
+		;.if eax <= 0 masm .if不支持有符号比较
+		cmp eax,0
+		jg @label1_u_r_o
+			add ecx,ecx
+			add [esi+RenderObject.x],ecx
 
-		add [esi+RenderObject.x],ecx
-		fld  [esi+RenderObject.phsx]
-		push ecx
-		fild dword ptr [esi]
-		pop  ecx
-		faddp st(1),st
-		fstp [esi+RenderObject.phsx]
+			fld  [esi+RenderObject.phsx]
+			push ecx
+			fild dword ptr [esp]
+			pop  ecx
+			faddp st(1),st
+			fstp [esi+RenderObject.phsx]
+		@label1_u_r_o:
+
 
 
 	.endif
@@ -553,17 +579,23 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 	mov ecx,0
 	.while ecx!=$state.render_object_size
 		.if [esi+RenderObject.obj_id] == OBJ_GOOSE || [esi+RenderObject.obj_id]==OBJ_BKG
+			inc ecx
+			add esi, sizeof RenderObject
 			.continue
 		.endif
-		invoke _check_obj_overlap,addr @p_goose,esi
+		invoke _check_obj_overlap,@p_goose,esi
 		.if eax !=0
 			mov @iscollide,1
+			;szText debugstr,"collide" 加上这个打印会有bug不知道为啥
+			;invoke crt_printf,addr debugstr
 		.endif
 		inc ecx
 		add esi, sizeof RenderObject
 	.endw
 
-	.if $state_jumping !=0
+	mov esi,@p_goose
+	.if $state_jumping ==0
+		mov eax,$state.time
 		and eax,GOOSE_INTERVAL
 		.if eax !=0 
 			invoke _get_image,IMAGE_GOOSE_RUN0_ID
@@ -642,7 +674,7 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 		pop eax
 		fcomip st,st(1)
 		fstp st(0)
-		jb aboveHeight
+		jb @label1_u_g
 
 		;小于高度的情况处理
 		mov $state_jumping,0
@@ -656,7 +688,7 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 		fstp [esi+RenderObject.vy]
 		invoke _get_image,IMAGE_GOOSE_RUN0_ID
 		mov [esi+RenderObject.p_image],eax
-		aboveHeight:
+		@label1_u_g:
 	.endif
 
 	push $state.time

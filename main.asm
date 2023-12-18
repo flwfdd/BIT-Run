@@ -49,6 +49,16 @@ $p_render_window_event dword ? ; 通知从缓冲区同步到窗口
 
 .code
 
+; 用于快速定义字符串
+szText MACRO Name, Text:VARARG
+LOCAL lbl
+	jmp lbl
+	Name db Text,13,10,0
+	lbl:
+ENDM
+
+
+
 ; 帧时钟信号产生线程
 _refresh_interval_thread PROC 
     local @freq:QWORD ; 时钟频率
