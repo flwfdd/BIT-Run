@@ -81,12 +81,12 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>G:\masm32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\masm32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Link>
     <MASM>
-      <IncludePaths>G:\masm32\include</IncludePaths>
+      <IncludePaths>C:\masm32\include</IncludePaths>
     </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +146,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="image\back_ground_test.bmp" />
+    <Image Include="image\background.bmp" />
     <Image Include="image\bird0.bmp" />
     <Image Include="image\bird1.bmp" />
     <Image Include="image\bit_badge.bmp" />

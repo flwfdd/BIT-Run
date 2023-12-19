@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ ï¿½ï¿½ï¿½ÉµÄ°ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
-// ï¿½ï¿½ BIT-Run.rc Ê¹ï¿½ï¿½
+// Microsoft Visual C++ Éú³ÉµÄ°üº¬ÎÄ¼þ¡£
+// ¹© BIT-Run.rc Ê¹ÓÃ
 //
 #define GOOSE_STAND                     101
 #define GOOSE_RUN0                      102
@@ -9,7 +9,7 @@
 #define BIT_BADGE                       201
 #define BIRD0                           301
 #define BIRD1                           302
-#define BKG                             401
+#define BACKGROUND                      401
 #define GYM                             501
 #define MUSEUM                          601
 #define LIBRARY                         701
@@ -21,7 +21,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        122
+#define _APS_NEXT_RESOURCE_VALUE        123
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

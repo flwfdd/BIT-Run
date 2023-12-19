@@ -23,6 +23,8 @@ extern $state:GameState ; 游戏状态
 
 .data
 
+S_SCORE db "SCORE: 00000 HI: 00000", 0
+
 $a_buffer_dc dword BUFFER_SIZE dup(?) ; 缓冲区设备上下文数组
 $a_buffer_bmp dword BUFFER_SIZE dup(?) ; 缓冲区位图数组
 $buffer_index dword 0 ; 缓冲区索引 指向最新绘制好的缓冲区
@@ -286,6 +288,16 @@ _render_buffer PROC uses ebx esi edi
 		inc esi
         add edi, sizeof RenderObject
     .endw
+
+    ; 渲染分数
+    invoke CreateFont, 20, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
+    mov esi, eax
+    invoke SelectObject, $a_buffer_dc[4*ebx], esi
+    invoke SetTextColor, $a_buffer_dc[4*ebx], 0
+    invoke SetBkMode, $a_buffer_dc[4*ebx], TRANSPARENT
+    invoke SetTextAlign, $a_buffer_dc[4*ebx], TA_RIGHT
+    invoke TextOut, $a_buffer_dc[4*ebx], WINDOW_WIDTH - 10, 10, offset S_SCORE, sizeof S_SCORE - 1
+    invoke DeleteObject, esi
 
 
     ; 更新缓冲区索引
