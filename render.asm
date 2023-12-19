@@ -238,7 +238,7 @@ _get_image ENDP
 
 
 ; 渲染缓冲区
-_render_buffer PROC uses ebx esi edi ecx
+_render_buffer PROC uses ebx esi edi
     ; 获取写入缓冲区的索引
     mov ebx, $buffer_index
     inc ebx
@@ -294,9 +294,6 @@ _render_buffer PROC uses ebx esi edi ecx
         jge @label1_r_b
 
 
-    ; 渲染对象
-    mov esi, 0 ; 渲染对象索引
-
     ; 渲染游戏结束
     .if $state.status == GAME_STATUS_OVER
         invoke _get_image, IMAGE_GAME_OVER_ID
@@ -304,17 +301,20 @@ _render_buffer PROC uses ebx esi edi ecx
     .endif
 
     ; 渲染分数
-    invoke CreateFont, 20, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
+    invoke CreateFont, 24, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
     mov esi, eax
     invoke SelectObject, $a_buffer_dc[4*ebx], esi
     invoke SetTextColor, $a_buffer_dc[4*ebx], 0
     invoke SetBkMode, $a_buffer_dc[4*ebx], TRANSPARENT
     invoke SetTextAlign, $a_buffer_dc[4*ebx], TA_RIGHT
     mov eax, $state.highest_score
-    div 100
+    mov edx, 0
+    mov esi, SCORE_RATIO
+    div esi
     mov ecx, eax
     mov eax, $state.score
-    div 100
+    mov edx, 0
+    div esi
     invoke crt_sprintf, offset $s_score, offset S_SCORE_FORMAT, eax, ecx
     invoke TextOut, $a_buffer_dc[4*ebx], WINDOW_WIDTH - 10, 10, offset $s_score, sizeof $s_score - 1
     invoke DeleteObject, esi

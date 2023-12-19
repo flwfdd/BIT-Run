@@ -7,9 +7,10 @@ RENDER_OBJ_SIZE EQU 16 ;绘制集合大小
 
 FPS EQU 60 ; 帧率
 FONT BYTE "LanaPixel", 0 ; 字体
+FONT_COLOR DWORD 0FFFFFFh ; 字体颜色
 
 HORIZON_HEIGHT EQU 32; 地面y坐标
-GOOSE_INITIAL_X EQU 100 ;鹅初始x坐标
+GOOSE_INITIAL_X EQU 32 ;鹅初始x坐标
 GOOSE_INITIAL_Y EQU HORIZON_HEIGHT ;鹅初始y坐标
 
 GOOSE_INTERVAL  EQU 100h ; 鹅走动间隔
@@ -21,24 +22,24 @@ GLIMI_VX   EQU 800      ; 全局x方向最大速度
 DELTA_GVX  EQU 4        ; 每10秒速度增量
 ACCER_INTERVAL EQU 80h
 
-JUMP_VY    EQU 800      ; 鹅初始弹跳速度
+JUMP_VY    EQU 1000      ; 鹅初始弹跳速度
 
-G          EQU 1530     ; 游戏内部重力加速度
-JUMPA      EQU 500      ; 弹跳辅助加速度
+G          EQU 3000     ; 游戏内部重力加速度
+JUMPA      EQU 1000      ; 弹跳辅助加速度
 
-INTERVAL_MIN EQU  250   ; 障碍物随机间隔最小值
-INTERVAL_MAX EQU  440   ; 障碍物随机间隔最大值
+INTERVAL_MIN EQU  WINDOW_WIDTH/4   ; 障碍物随机间隔最小值
+INTERVAL_MAX EQU  WINDOW_WIDTH   ; 障碍物随机间隔最大值
 
-BIRD_HEIGHT_MIN EQU  WINDOW_HEIGHT  ; 鸟高度最小值(都是相对于地面)
+BIRD_HEIGHT_MIN EQU  WINDOW_HEIGHT/8  ; 鸟高度最小值(都是相对于地面)
 BIRD_HEIGHT_MAX EQU  WINDOW_HEIGHT/2  ; 鸟高度最大值
 
 CLOUD_HEIGHT_MIN EQU WINDOW_HEIGHT/4 ;  云层高度最小值（相对于窗口）
 CLOUD_HEIGHT_MAX EQU WINDOW_HEIGHT ;  云层高度最大值
 
-BIRD_VX     EQU  10       ; 鸟相对于地面的速度
+BIRD_VX     EQU  20       ; 鸟相对于地面的速度
 
 CLOUD_VX    EQU  80      ; 云相对于地面的速度(不要用负数)
-CLOUD_INTERVAL EQU  100  ; 云最低间隔（最好要大于1/4的窗口宽度）
+CLOUD_INTERVAL EQU  WINDOW_WIDTH/4  ; 云最低间隔（最好要大于1/4的窗口宽度）
 
 SCORE_RATIO  EQU 100     ;分数系数，防止太大太快
 
