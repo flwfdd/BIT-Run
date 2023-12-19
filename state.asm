@@ -51,6 +51,7 @@ $state_jumping  dword 0;鹅是否滞空
 $state_keypress  word 0;上一次检测到的按键输入(word->SHORT)
 $state_voiceinput  dword 0;上一次检测到的按键输入(word->SHORT)
 
+$state_lastaccer dword 0;用于记录上一次加速
 
 FLOATSCONST1 REAL4 0.001
 FLOATSCONST2 REAL4 0.5
@@ -172,6 +173,48 @@ _start_state PROC uses ecx edi edx
 
 _start_state ENDP
 
+
+_accelerate_all_obj PROC uses ecx esi
+	mov eax,$state.time
+	and eax, ACCER_INTERVAL
+	.if eax !=0
+		.if $state_lastaccer==0
+
+			; 加速
+			fld $state.global_vx
+			fldI DELTA_GVX
+			fchs
+			faddp st(1),st
+			fstp $state.global_vx
+
+			; 更新所有物体的速度
+			mov esi,$state.p_a_render_object
+			mov ecx,0
+			.while ecx != $state.render_object_size
+				.if [esi+RenderObject.obj_id] != OBJ_GOOSE
+					fldI DELTA_GVX
+					fchs
+					fld [esi+RenderObject.vx]
+					faddp st(1),st
+					fstp [esi+RenderObject.vx]
+				.endif
+				inc ecx
+				add esi,sizeof RenderObject
+			.endw
+		.endif
+		mov $state_lastaccer,1
+	.else
+		mov $state_lastaccer,0
+
+	.endif
+
+	ret
+
+_accelerate_all_obj ENDP
+
+
+
+
 ; 更新状态
 _state_update PROC uses ebx esi
 	local @collide
@@ -198,7 +241,17 @@ _state_update PROC uses ebx esi
 
 	.if @collide
 		mov $state.status,GAME_STATUS_OVER
+		mov eax,$state.score
+		.if eax > $state.highest_score
+			mov $state.highest_score,eax
+		.endif
 	.endif
+
+	szText @debugstr1, "current score:%d"
+	invoke crt_printf,addr @debugstr1,$state.score
+
+	; 增加全局速度，同时加速所有物体
+	invoke _accelerate_all_obj
 
 	; 根据是否发生碰撞更新绘制列表
 	invoke _update_render_list,@collide
@@ -257,6 +310,7 @@ _check_key_down PROC uses ecx edi edx
 		.if $state.status == GAME_STATUS_OVER
 			; .if $state_keypress == 0
 			.if $state_voiceinput || $state_keypress == 0
+				invoke Sleep,1000
 				invoke _reset_state
 			.endif
 		.endif
@@ -481,6 +535,17 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 	local @oldprecise:WORD  ; 临时存储浮点数控制字，用于舍入调整
 	local @newprecise:WORD  ;
 
+	; 计算距离上一次绘制经过了多少毫秒
+	push $state.time
+	pop @deltat
+	mov ecx,[esi+RenderObject.lasttsp]
+	sub @deltat,ecx
+
+	finit
+	fild @deltat
+	fld  FLOATSCONST1
+	fmulp st(1),st
+	fstp @fdeltat
 
 	mov esi,@p_goose
 	.if $state_jumping ==0
@@ -494,21 +559,9 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 		mov [esi+RenderObject.p_image],eax
 	.else
 
-		; 计算距离上一次绘制经过了多少毫秒
-		push $state.time
-		pop @deltat
-		mov ecx,[esi+RenderObject.lasttsp]
-		sub @deltat,ecx
-
-		finit
-		fild @deltat
-		fld  FLOATSCONST1
-		fmulp st(1),st
-		fstp @fdeltat
 
 		; 加载加速度
 		movzx eax,$state_keypress
-		or eax,$state_voiceinput 
 		.if eax != 0
 			mov eax,G
 			sub eax,JUMPA
@@ -583,6 +636,20 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 
 	push $state.time
 	pop [esi+RenderObject.lasttsp]
+
+	fld @fdeltat
+	fld $state.global_vx
+	fchs
+	fmulp st(1),st
+	fild $state.score
+	faddp st(1),st
+	fnstcw @oldprecise
+	movzx eax,@oldprecise
+	or ah,12
+	mov @newprecise,ax
+	fldcw @newprecise
+	fistp $state.score
+	fldcw @oldprecise
 
 	mov esi,$state.p_a_render_object
 	mov @iscollide,0
@@ -665,8 +732,8 @@ _update_obstacles PROC uses ecx esi edx ebx
 	.endif
 
 	; 最多容许添加4个云
-	.if @ncloud < 4
-		mov eax,4
+	.if @ncloud < 6
+		mov eax,6
 		sub eax,@ncloud
 		mov @ncloud,eax
 		.while @ncloud !=0
@@ -678,7 +745,7 @@ _update_obstacles PROC uses ecx esi edx ebx
 
 			invoke crt_rand
 			xor edx,edx
-			mov ebx,WINDOW_WIDTH
+			mov ebx,400
 			div ebx
 			mov eax,edx
 			add @lastcloudx,eax
