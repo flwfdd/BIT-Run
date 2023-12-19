@@ -794,7 +794,7 @@ _update_obstacles PROC uses ecx esi edx ebx
 		mov @obstacle.vy,0
 		m2m @obstacle.lasttsp,@curtime
 
-		mov @obstacle.z,1
+		mov @obstacle.z,0
 
 		;将这个对象添加到绘制列表中
 		invoke _add_render_object,addr @obstacle
