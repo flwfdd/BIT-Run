@@ -12,8 +12,8 @@ HORIZON_HEIGHT  EQU 188 ; 地面y坐标
 GOOSE_INITIAL_X EQU 100 ; 鹅初始x坐标
 GOOSE_INITIAL_Y EQU HORIZON_HEIGHT ;鹅初始y坐标
 
-GOOSE_INTERVAL  EQU 10h ; 鹅走动间隔
-BIRD_INTERVAL   EQU 10h ; 鸟扇动翅膀间隔
+GOOSE_INTERVAL  EQU 100h ; 鹅走动间隔
+BIRD_INTERVAL   EQU 100h ; 鸟扇动翅膀间隔
 
 ; 这里定义都使用整数而不是浮点数
 GINIT_VX   EQU 400      ; 全局x方向速度
