@@ -23,7 +23,8 @@ extern $state:GameState ; 游戏状态
 
 .data
 
-S_SCORE db "SCORE: 00000 HI: 00000", 0
+S_SCORE_FORMAT db "SCORE: %05d HI: %05d", 0
+$s_score db "SCORE: 00000 HI: 00000", 0
 
 $a_buffer_dc dword BUFFER_SIZE dup(?) ; 缓冲区设备上下文数组
 $a_buffer_bmp dword BUFFER_SIZE dup(?) ; 缓冲区位图数组
@@ -217,6 +218,24 @@ _check_obj_overlap PROC uses ebx esi edi ecx @p_obj1:DWORD, @p_obj2:DWORD
     ret
 _check_obj_overlap ENDP
 
+; 获取单个图像 传入图像ID 输出图像指针
+_get_image PROC uses esi edi @id:DWORD
+    mov esi, $p_a_image ; esi指向图像
+    mov edi, @id ; edi指向图像ID
+    mov ecx, 0
+    .while ecx < IMAGES_SIZE
+        .if [esi + Image.id] == edi
+            mov eax, esi
+            ret
+        .endif
+        add esi, sizeof Image
+        inc ecx
+    .endw
+    
+    xor eax, eax
+    ret
+_get_image ENDP
+
 
 ; 渲染缓冲区
 _render_buffer PROC uses ebx esi edi ecx
@@ -278,6 +297,12 @@ _render_buffer PROC uses ebx esi edi ecx
     ; 渲染对象
     mov esi, 0 ; 渲染对象索引
 
+    ; 渲染游戏结束
+    .if $state.status == GAME_STATUS_OVER
+        invoke _get_image, IMAGE_GAME_OVER_ID
+        invoke TransparentBlt, $a_buffer_dc[4*ebx], 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+    .endif
+
     ; 渲染分数
     invoke CreateFont, 20, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
     mov esi, eax
@@ -285,7 +310,13 @@ _render_buffer PROC uses ebx esi edi ecx
     invoke SetTextColor, $a_buffer_dc[4*ebx], 0
     invoke SetBkMode, $a_buffer_dc[4*ebx], TRANSPARENT
     invoke SetTextAlign, $a_buffer_dc[4*ebx], TA_RIGHT
-    invoke TextOut, $a_buffer_dc[4*ebx], WINDOW_WIDTH - 10, 10, offset S_SCORE, sizeof S_SCORE - 1
+    mov eax, $state.highest_score
+    div 100
+    mov ecx, eax
+    mov eax, $state.score
+    div 100
+    invoke crt_sprintf, offset $s_score, offset S_SCORE_FORMAT, eax, ecx
+    invoke TextOut, $a_buffer_dc[4*ebx], WINDOW_WIDTH - 10, 10, offset $s_score, sizeof $s_score - 1
     invoke DeleteObject, esi
 
 
@@ -421,25 +452,6 @@ _init_image PROC uses ebx esi edi @p_image:DWORD
 
     ret
 _init_image ENDP
-
-
-; 获取单个图像 传入图像ID 输出图像指针
-_get_image PROC uses esi edi @id:DWORD
-    mov esi, $p_a_image ; esi指向图像
-    mov edi, @id ; edi指向图像ID
-    mov ecx, 0
-    .while ecx < IMAGES_SIZE
-        .if [esi + Image.id] == edi
-            mov eax, esi
-            ret
-        .endif
-        add esi, sizeof Image
-        inc ecx
-    .endw
-    
-    xor eax, eax
-    ret
-_get_image ENDP
 
 ; 释放单个图像
 _free_image PROC @p_image:DWORD
