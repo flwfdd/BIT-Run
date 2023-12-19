@@ -43,15 +43,13 @@ _update_obstacles   PROTO
 
 .data
 
-; DEBUG 渲染对象
-a_render_object_test RenderObject 10 dup (<>) ; 渲染对象数组
-x_text dword 0
-
 $state_jumping  dword 0;鹅是否滞空
 $state_keypress  word 0;上一次检测到的按键输入(word->SHORT)
 $state_voiceinput  dword 0;上一次检测到的按键输入(word->SHORT)
 
-$state_lastaccer dword 0;用于记录上一次加速
+$state_lastaccer dword 0 ;用于记录上一次加速
+
+$game_over_time dword 0 ;游戏结束时间
 
 FLOATSCONST1 REAL4 0.001
 FLOATSCONST2 REAL4 0.5
@@ -245,8 +243,16 @@ _state_update PROC uses ebx esi
 		.if eax > $state.highest_score
 			mov $state.highest_score,eax
 		.endif
+
+		; 更新死亡时间
+		mov eax, $state.time
+		mov $game_over_time, eax
+
+		; 输出音效
+		invoke PlaySound, SOUND_GOOSE_ID, NULL, SND_RESOURCE or SND_ASYNC
 	.endif
 
+	; DEBUG 打印分数
 	szText @debugstr1, "current score:%d"
 	invoke crt_printf,addr @debugstr1,$state.score
 
@@ -266,23 +272,20 @@ _state_update ENDP
 _check_key_down PROC uses ecx edi edx
 	local @keystate:word
 	invoke GetAsyncKeyState, VK_SPACE
-	mov  @keystate,ax
-	.if $voice_input || ax != 0
-		;DEBUG
-		;szText debugstr1,"detect key pressed"
-		;invoke crt_printf,addr debugstr1
-
+	mov  @keystate, ax
+	; 死亡后屏蔽一段时间
+	mov eax, $state.time
+	sub eax, $game_over_time
+	.if (eax > RESTART_INTERVAL) && ($voice_input || @keystate != 0)
 		; 处理各个阶段按下空格的状态更新
 		.if $state.status == GAME_STATUS_INIT
-			mov $state.status,GAME_STATUS_RUN
+			mov $state.status, GAME_STATUS_RUN
 			invoke _start_state
 		.endif
 
 		.if $state.status == GAME_STATUS_INIT || $state.status == GAME_STATUS_RUN
-
-
 			.if $state_jumping ==0 
-				mov $state_jumping,1
+				mov $state_jumping, 1
 
 				;遍历绘制列表找到鹅
 				mov ecx,0
@@ -304,27 +307,23 @@ _check_key_down PROC uses ecx edi edx
 					inc ecx
 				.endw
 
+				; 播放音效
+				.if @keystate != 0
+					invoke PlaySound, SOUND_BIU_ID, NULL, SND_RESOURCE or SND_ASYNC
+				.endif
 			.endif
 		.endif
 
 		.if $state.status == GAME_STATUS_OVER
-			; .if $state_keypress == 0
-			.if $state_voiceinput || $state_keypress == 0
-				invoke Sleep,1000
-				invoke _reset_state
-			.endif
+			invoke _reset_state
 		.endif
-
-	; DEBUG
-	; .else
-	; 	szText debugstr2,"detect no key pressed"
-	; 	invoke crt_printf,addr debugstr2
+		
 	.endif
 
 	mov cx, @keystate
-	mov $state_keypress,cx
+	mov $state_keypress, cx
 	mov ecx, $voice_input
-	mov $state_voiceinput,ecx
+	mov $state_voiceinput, ecx
 
 	ret
 

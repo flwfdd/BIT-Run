@@ -23,6 +23,7 @@ extern $state:GameState ; 游戏状态
 
 .data
 
+S_INTRO db "按下空格或鹅叫以开始", 0
 S_SCORE_FORMAT db "SCORE: %05d HI: %05d", 0
 $s_score db "SCORE: 00000 HI: 00000", 0
 
@@ -293,6 +294,18 @@ _render_buffer PROC uses ebx esi edi
         dec ecx
         jge @label1_r_b
 
+    ; 渲染游戏引导
+    .if $state.status == GAME_STATUS_INIT
+        invoke CreateFont, 24, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
+        mov esi, eax
+        invoke SelectObject, $a_buffer_dc[4*ebx], esi
+        invoke SetTextColor, $a_buffer_dc[4*ebx], FONT_COLOR
+        invoke SetBkMode, $a_buffer_dc[4*ebx], TRANSPARENT
+        invoke SetTextAlign, $a_buffer_dc[4*ebx], TA_CENTER
+        invoke TextOut, $a_buffer_dc[4*ebx], WINDOW_WIDTH/2, WINDOW_HEIGHT/2, offset S_INTRO, sizeof S_INTRO - 1
+        invoke DeleteObject, esi
+    .endif
+
 
     ; 渲染游戏结束
     .if $state.status == GAME_STATUS_OVER
@@ -304,7 +317,7 @@ _render_buffer PROC uses ebx esi edi
     invoke CreateFont, 24, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT
     mov esi, eax
     invoke SelectObject, $a_buffer_dc[4*ebx], esi
-    invoke SetTextColor, $a_buffer_dc[4*ebx], 0
+    invoke SetTextColor, $a_buffer_dc[4*ebx], FONT_COLOR
     invoke SetBkMode, $a_buffer_dc[4*ebx], TRANSPARENT
     invoke SetTextAlign, $a_buffer_dc[4*ebx], TA_RIGHT
     mov eax, $state.highest_score

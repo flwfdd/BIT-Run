@@ -167,6 +167,10 @@
   <ItemGroup>
     <ResourceCompile Include="BIT-Run.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="sound\biu.wav" />
+    <Media Include="sound\goose.wav" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
