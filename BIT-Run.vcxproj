@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -149,12 +149,17 @@
     <Image Include="image\back_ground_test.bmp" />
     <Image Include="image\bird0.bmp" />
     <Image Include="image\bird1.bmp" />
-    <Image Include="image\bitmap2.bmp" />
     <Image Include="image\bit_badge.bmp" />
+    <Image Include="image\cloud.bmp" />
+    <Image Include="image\gate.bmp" />
     <Image Include="image\goose_jump.bmp" />
     <Image Include="image\goose_run0.bmp" />
     <Image Include="image\goose_run1.bmp" />
     <Image Include="image\goose_stand.bmp" />
+    <Image Include="image\gym.bmp" />
+    <Image Include="image\library.bmp" />
+    <Image Include="image\museum.bmp" />
+    <Image Include="image\stone.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BIT-Run.rc" />
