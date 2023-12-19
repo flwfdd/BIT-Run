@@ -18,47 +18,47 @@ includelib  msvcrt.lib
 
 include     bitrun.inc
 
-; äÖÈ¾Ä£¿é
-_init_render PROTO ; ³õÊ¼»¯äÖÈ¾Ä£¿é
-_free_render PROTO ; ÊÍ·ÅäÖÈ¾Ä£¿é
-_render_buffer PROTO ; äÖÈ¾»º³åÇø
-_render_window PROTO ; äÖÈ¾»º³åÇøµ½´°¿Ú
+; ï¿½ï¿½È¾Ä£ï¿½ï¿½
+_init_render PROTO ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¾Ä£ï¿½ï¿½
+_free_render PROTO ; ï¿½Í·ï¿½ï¿½ï¿½È¾Ä£ï¿½ï¿½
+_render_buffer PROTO ; ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+_render_window PROTO ; ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-; ×´Ì¬Ä£¿é
-_init_state   PROTO ; ³õÊ¼»¯×´Ì¬Ä£¿é
-_state_update PROTO ; ×´Ì¬¸üÐÂ
-_check_key_down PROTO;¼ì²â°´¼ü²¢¸üÐÂ×´Ì¬
+; ×´Ì¬Ä£ï¿½ï¿½
+_init_state   PROTO ; ï¿½ï¿½Ê¼ï¿½ï¿½×´Ì¬Ä£ï¿½ï¿½
+_state_update PROTO ; ×´Ì¬ï¿½ï¿½ï¿½ï¿½
+_check_key_down PROTO;ï¿½ï¿½â°´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 
 public $h_instance, $h_window_main, $state, $voice_input
 
 .const
-S_MAIN_WINDOW_TITLE byte '±±ÀíÈó - BITRun', 0 ; Ö÷´°¿Ú±êÌâ
-S_MAIN_CLASS_NAME byte 'main_window_class', 0 ; Ö÷´°¿ÚÀàÃû
+S_MAIN_WINDOW_TITLE byte 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - BITRun', 0 ; ï¿½ï¿½ï¿½ï¿½ï¿½Ú±ï¿½ï¿½ï¿½
+S_MAIN_CLASS_NAME byte 'main_window_class', 0 ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 .data
 
 .data?
-$h_instance dword ? ; ³ÌÐòÊµÀý¾ä±ú
-$h_window_main dword ? ; Ö÷´°¿Ú¾ä±ú
+$h_instance dword ? ; ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½
+$h_window_main dword ? ; ï¿½ï¿½ï¿½ï¿½ï¿½Ú¾ï¿½ï¿½
 
-$state GameState <> ; ÓÎÏ·×´Ì¬
+$state GameState <> ; ï¿½ï¿½Ï·×´Ì¬
 
-$thread_live dword ? ; Ïß³Ì´æ»î±êÖ¾ Îª0Ê±Ïß³ÌÍË³ö
-$p_render_buffer_event dword ? ; Í¨Öª»æÖÆ»º³åÇø
-$p_render_window_event dword ? ; Í¨Öª´Ó»º³åÇøÍ¬²½µ½´°¿Ú
+$thread_live dword ? ; ï¿½ß³Ì´ï¿½ï¿½ï¿½Ö¾ Îª0Ê±ï¿½ß³ï¿½ï¿½Ë³ï¿½
+$p_render_buffer_event dword ? ; Í¨Öªï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½ï¿½ï¿½
+$p_render_window_event dword ? ; Í¨Öªï¿½Ó»ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-; ÒôÆµ´¦ÀíÏà¹Ø
-$hWaveIn dword  ? ; wave ¾ä±ú
-$pBuffer dword  ? ; »º³åÇøÖ¸Õë
-$wHdr WAVEHDR <> ; ²¨ÐÎÒôÆµ»º³åÇøµÄ±êÍ·
-$waveform WAVEFORMATEX <>    ; ¶¨ÒåÒ»¸ö WAVEFORMATEX ½á¹¹Ìå±äÁ¿£¬ÓÃÓÚ´æ´¢²É¼¯ÒôÆµµÄ¸ñÊ½
+; ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+$hWaveIn dword  ? ; wave ï¿½ï¿½ï¿½
+$pBuffer dword  ? ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+$wHdr WAVEHDR <> ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½Í·
+$waveform WAVEFORMATEX <>    ; ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ WAVEFORMATEX ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´æ´¢ï¿½É¼ï¿½ï¿½ï¿½Æµï¿½Ä¸ï¿½Ê½
 
-$bStop dword 0     ; Í¨ÖªÒôÆµ´¦Àí»Øµ÷ÒÑ½áÊø
-$voice_input dword 0    ; Âó¿Ë·çÄ£¿é£ºÊÇ·ñµ½´ïãÐÖµ
+$bStop dword 0     ; Í¨Öªï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½Ñ½ï¿½ï¿½ï¿½
+$voice_input dword 0    ; ï¿½ï¿½Ë·ï¿½Ä£ï¿½é£ºï¿½Ç·ñµ½´ï¿½ï¿½ï¿½Öµ
 
 .code
 
-; ÓÃÓÚ¿ìËÙ¶¨Òå×Ö·û´®
+; ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 szText MACRO Name, Text:VARARG
 LOCAL lbl
 	jmp lbl
@@ -68,50 +68,50 @@ ENDM
 
 
 
-; Ö¡Ê±ÖÓÐÅºÅ²úÉúÏß³Ì
+; Ö¡Ê±ï¿½ï¿½ï¿½ÅºÅ²ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 _refresh_interval_thread PROC 
-    local @freq:QWORD ; Ê±ÖÓÆµÂÊ
-    local @time0:QWORD, @time1:QWORD ; Ê±¼ä
-    local @last_us:DWORD ; ÉÏÒ»´ÎµÄÊ±¼ä µ¥Î»Î¢Ãë
-    local @1m:DWORD ; ³£Á¿1000000 ÓÃÓÚ¼ÆËãÎ¢Ãë
+    local @freq:QWORD ; Ê±ï¿½ï¿½Æµï¿½ï¿½
+    local @time0:QWORD, @time1:QWORD ; Ê±ï¿½ï¿½
+    local @last_us:DWORD ; ï¿½ï¿½Ò»ï¿½Îµï¿½Ê±ï¿½ï¿½ ï¿½ï¿½Î»Î¢ï¿½ï¿½
+    local @1m:DWORD ; ï¿½ï¿½ï¿½ï¿½1000000 ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½Î¢ï¿½ï¿½
     mov @1m, 1000000
     mov @last_us, 0
-    invoke QueryPerformanceFrequency, addr @freq ; »ñÈ¡Ê±ÖÓÆµÂÊ
-    invoke QueryPerformanceCounter, addr @time0 ; »ñÈ¡³õÊ¼Ê±¼ä
+    invoke QueryPerformanceFrequency, addr @freq ; ï¿½ï¿½È¡Ê±ï¿½ï¿½Æµï¿½ï¿½
+    invoke QueryPerformanceCounter, addr @time0 ; ï¿½ï¿½È¡ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
     finit
     .while $thread_live == 1
-        ; ¼ÆËãÊ±¼ä²î
+        ; ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
         invoke QueryPerformanceCounter,addr @time1
         mov eax, dword ptr @time0
         mov edx, dword ptr @time0+4
         sub dword ptr @time1, eax
         sbb dword ptr @time1+4, edx
-        fild @time1 ; ¼ÆÊýÆ÷²îÖµ
-        fimul @1m ; ³ËÒÔµ¥Î»ÆµÂÊ
-        fild @freq ; ³ýÒÔÆµÂÊ µÃµ½ÒÔµ¥Î»ÆµÂÊÎªµ¥Î»µÄÊ±¼ä²î
+        fild @time1 ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+        fimul @1m ; ï¿½ï¿½ï¿½Ôµï¿½Î»Æµï¿½ï¿½
+        fild @freq ; ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ ï¿½Ãµï¿½ï¿½Ôµï¿½Î»Æµï¿½ï¿½Îªï¿½ï¿½Î»ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
         fdiv
-        fistp @time1 ; ¿ªÊ¼µ½ÏÖÔÚµÄÊ±¼ä²î
+        fistp @time1 ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Ê±ï¿½ï¿½ï¿½
 
-        ; ¼ÆËãÏÂÒ»Ö¡Ê±¼ä
+        ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ö¡Ê±ï¿½ï¿½
         mov eax, @last_us
         add eax, 1000000/FPS
 
         .if eax > dword ptr @time1
-            ; Ê±ºòÎ´µ½
+            ; Ê±ï¿½ï¿½Î´ï¿½ï¿½
 			sub eax, dword ptr @time1
 			;invoke Sleep, eax
         .else
-            ; DEBUG Ã¿¸öÖÜÆÚ´òÓ¡Ò»¸ö.
+            ; DEBUG Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½Ó¡Ò»ï¿½ï¿½.
             invoke crt_putchar, '.'
 
-            ; ¸üÐÂÊ±¼ä
+            ; ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
             mov eax, dword ptr @time1
             mov @last_us, eax
 
-            ; ¼ì²â°´¼üÊäÈë
+            ; ï¿½ï¿½â°´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             invoke _check_key_down
 
-            ; Í¨ÖªäÖÈ¾»º³åÇø
+            ; Í¨Öªï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             invoke SetEvent, $p_render_buffer_event
         .endif
 
@@ -120,63 +120,63 @@ _refresh_interval_thread PROC
 _refresh_interval_thread ENDP
 
 
-; äÖÈ¾»º³åÇøÏß³Ì
+; ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 _render_buffer_thread PROC
-    local @freq:QWORD ; Ê±ÖÓÆµÂÊ
-    local @time0:QWORD, @time1:QWORD ; Ê±¼ä
-    local @1k:DWORD ; ³£Á¿1000 ÓÃÓÚ¼ÆËãºÁÃë
+    local @freq:QWORD ; Ê±ï¿½ï¿½Æµï¿½ï¿½
+    local @time0:QWORD, @time1:QWORD ; Ê±ï¿½ï¿½
+    local @1k:DWORD ; ï¿½ï¿½ï¿½ï¿½1000 ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     mov @1k, 1000
-    invoke QueryPerformanceFrequency, addr @freq ; »ñÈ¡Ê±ÖÓÆµÂÊ
-    invoke QueryPerformanceCounter, addr @time0 ; »ñÈ¡³õÊ¼Ê±¼ä
+    invoke QueryPerformanceFrequency, addr @freq ; ï¿½ï¿½È¡Ê±ï¿½ï¿½Æµï¿½ï¿½
+    invoke QueryPerformanceCounter, addr @time0 ; ï¿½ï¿½È¡ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
     finit
     .while $thread_live != 0
-        ; ÊÂ¼þÍ¬²½
+        ; ï¿½Â¼ï¿½Í¬ï¿½ï¿½
         invoke WaitForSingleObject, $p_render_buffer_event, INFINITE
         invoke ResetEvent, $p_render_buffer_event
 
-        ; ¸üÐÂÊ±¼ä
+        ; ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
         invoke QueryPerformanceCounter,addr @time1
         mov eax, dword ptr @time0
         mov edx, dword ptr @time0+4
         sub dword ptr @time1, eax
         sbb dword ptr @time1+4, edx
-        fild @time1 ; ¼ÆÊýÆ÷²îÖµ
-        fimul @1k ; ³ËÒÔµ¥Î»ÆµÂÊ
-        fild @freq ; ³ýÒÔÆµÂÊ µÃµ½ÒÔµ¥Î»ÆµÂÊÎªµ¥Î»µÄÊ±¼ä²î
+        fild @time1 ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+        fimul @1k ; ï¿½ï¿½ï¿½Ôµï¿½Î»Æµï¿½ï¿½
+        fild @freq ; ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ ï¿½Ãµï¿½ï¿½Ôµï¿½Î»Æµï¿½ï¿½Îªï¿½ï¿½Î»ï¿½ï¿½Ê±ï¿½ï¿½ï¿½
         fdiv
-        fistp @time1 ; ¿ªÊ¼µ½ÏÖÔÚµÄÊ±¼ä²î
+        fistp @time1 ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Ê±ï¿½ï¿½ï¿½
         mov eax, dword ptr @time1
         mov $state.time, eax
         
 
-        ; ×´Ì¬¸üÐÂ
+        ; ×´Ì¬ï¿½ï¿½ï¿½ï¿½
         invoke _state_update
 
-        ; äÖÈ¾
+        ; ï¿½ï¿½È¾
         invoke _render_buffer
 
-        ; Í¨ÖªÍ¬²½µ½´°¿Ú
+        ; Í¨ÖªÍ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         invoke SetEvent, $p_render_window_event
     .endw
     ret
         
 _render_buffer_thread ENDP
 
-; Í¬²½»º³åÇøµ½´°¿ÚÏß³Ì
+; Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 _render_window_thread PROC
 
     .while $thread_live != 0
-        ; »º³åÇø¿Õ»òÕßË¢ÐÂ±êÖ¾Îª0Ê±µÈ´ý
+        ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½Ë¢ï¿½Â±ï¿½Ö¾Îª0Ê±ï¿½È´ï¿½
         invoke WaitForSingleObject, $p_render_window_event, INFINITE
         invoke ResetEvent, $p_render_window_event
 
-        ; äÖÈ¾»º³åÇøµ½´°¿Ú
+        ; ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         invoke _render_window
     .endw
     ret
 _render_window_thread ENDP
 
-    ; ¼ÆËãÒôÆµ»º³åÇøÖÐµÄ×ÜÒôÁ¿
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 _micro_get_volume PROC uses ecx edx, pcmdata: ptr byte, len: dword
     local  dbVal:dword
     local  value:word
@@ -190,9 +190,9 @@ _micro_get_volume PROC uses ecx edx, pcmdata: ptr byte, len: dword
     mov    value, 0
     mov    decible, 0
 
-    ; ½øÈëÑ­»·
+    ; ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½
     mov    ecx, len
-    shr    ecx, 1                                                     ; ³ýÒÔ2£¬ÒòÎªÃ¿´ÎµÝÔö2
+    shr    ecx, 1                                                     ; ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ÎªÃ¿ï¿½Îµï¿½ï¿½ï¿½2
     mov    esi, pcmdata
     mov    edi, 0
 
@@ -200,11 +200,11 @@ _micro_get_volume PROC uses ecx edx, pcmdata: ptr byte, len: dword
     cmp    i, ecx
     jae    L_END
 
-    ; ¸´ÖÆ1¸ö×Ö½ÚµÄÊý¾Ý
+    ; ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½Ö½Úµï¿½ï¿½ï¿½ï¿½ï¿½
     mov    ax, word ptr [esi]
     mov    value, ax
 
-    ; Çó¾ø¶ÔÖµ²¢ÀÛ¼Óµ½sum
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½Û¼Óµï¿½sum
     movsx  eax, value
     cdq
     ;   abs(x) = (x XOR y) - y        y = x >>> 31
@@ -212,7 +212,7 @@ _micro_get_volume PROC uses ecx edx, pcmdata: ptr byte, len: dword
     sub    eax, edx
     add    sum, eax
 
-    ; ¸üÐÂÑ­»·Ë÷Òý
+    ; ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     add    esi, 2
     inc    i
     jmp    L_LOOP
@@ -222,7 +222,7 @@ L_END:
 
 _micro_get_volume ENDP
 
-    ; »Øµ÷º¯Êý´¦ÀíÒôÆµ
+    ; ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµ
 _change_voice_state PROC ,hwi: dword, uMsg: dword, dwInstance: ptr dword, dwParam1: ptr dword, dwParam2: ptr dword
 
     .if uMsg == WIM_OPEN
@@ -236,51 +236,51 @@ _change_voice_state PROC ,hwi: dword, uMsg: dword, dwInstance: ptr dword, dwPara
         .if eax >= DBTHRESHOLD
             mov    $voice_input, 1
             ; invoke crt_printf, offset szbJump, $voice_input
-            ; ¼ì²é volsum
+            ; ï¿½ï¿½ï¿½ volsum
             ;  invoke crt_printf, offset szDBVal, eax
         .else
             ;invoke crt_printf, offset szFmtStr, offset depoint
             mov    $voice_input, 0
         .endif
-        ; ¼ÓÈë»º´æ¼ÌÐø
+        ; ï¿½ï¿½ï¿½ë»ºï¿½ï¿½ï¿½ï¿½ï¿½
         ;  invoke crt_printf, offset szFmtStr, offset szData
         invoke waveInAddBuffer, hwi, dwParam1, sizeof WAVEHDR
 .endif
-    ; »ñÈ¡³ÌÐò½áÊøÊ±¼ä
+    ; ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
     ; invoke GetTickCount
     ; mov    endTime, eax
 
-    ; ¼ÆËãÖ´ÐÐÊ±¼ä²îÖµ
+    ; ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Öµ
     ; sub    eax, startTime
     ; mov    elapsedTime, eax
 
-    ; ´òÓ¡Ö´ÐÐÊ±¼ä
+    ; ï¿½ï¿½Ó¡Ö´ï¿½ï¿½Ê±ï¿½ï¿½
     ;  invoke crt_printf, OFFSET timeFormat,  elapsedTime
-    ; ÖØÐÂ¼ÆÊ±
+    ; ï¿½ï¿½ï¿½Â¼ï¿½Ê±
     ; invoke GetTickCount
     ; mov    startTime, eax
 @end:
     ret
 _change_voice_state ENDP
 
-    ; Â¼ÒôÏß³Ìº¯Êý
+    ; Â¼ï¿½ï¿½ï¿½ß³Ìºï¿½ï¿½ï¿½
 _record_thread PROC
     push   ebp
     mov    ebp, esp
 
-    ; »ñÈ¡³ÌÐò¿ªÊ¼Ê±¼ä
+    ; ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
     ; invoke GetTickCount
     ; mov    startTime, eax
 
-    ; ´ò¿ªÄ¬ÈÏÒôÆµÊäÈëÉè±¸
+    ; ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½è±¸
     invoke waveInOpen, offset $hWaveIn, WAVE_MAPPER, offset $waveform, _change_voice_state, 0, CALLBACK_FUNCTION
 
-    ; ·ÖÅäÒôÆµ»º³åÇø
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     invoke GetProcessHeap
     invoke HeapAlloc, eax, HEAP_ZERO_MEMORY, VOICEBUFFER_SIZE
     ;  mov    $pBuffer, eax
 
-    ; ÅäÖÃ WAVEHDR ½á¹¹
+    ; ï¿½ï¿½ï¿½ï¿½ WAVEHDR ï¿½á¹¹
     mov    $wHdr.lpData, eax
     mov    $wHdr.dwBufferLength, VOICEBUFFER_SIZE
     mov    $wHdr.dwBytesRecorded, 0
@@ -288,14 +288,14 @@ _record_thread PROC
     mov    $wHdr.dwFlags, 0
     mov    $wHdr.dwLoops, 1
 
-    ; ´´½¨Â¼Òô»º³åÇø
+    ; ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     invoke waveInPrepareHeader, $hWaveIn, offset $wHdr, sizeof WAVEHDR
                 
 
-    ; ¿ªÊ¼Â¼Òô
+    ; ï¿½ï¿½Ê¼Â¼ï¿½ï¿½
     invoke waveInAddBuffer, $hWaveIn, offset $wHdr, sizeof WAVEHDR
     invoke waveInStart, $hWaveIn
-    ; Ë¯Ãß 10 s debug
+    ; Ë¯ï¿½ï¿½ 10 s debug
     ;  invoke Sleep, 10000
     ;  mov    $bStop, 1
     ;  invoke crt_printf, offset szFmtStr, offset depoint
@@ -303,9 +303,9 @@ _record_thread PROC
     ret
 _record_thread ENDP
 
-    ; ÊÍ·ÅÂ¼Òô×ÊÔ´
+    ; ï¿½Í·ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ô´
 _free_micro PROC C
-    ; Í£Ö¹Â¼Òô
+    ; Í£Ö¹Â¼ï¿½ï¿½
     mov    $bStop, 1
     invoke waveInStop, $hWaveIn
     invoke waveInReset, $hWaveIn
@@ -314,8 +314,8 @@ _free_micro PROC C
         invoke crt_exit
     .endif
 
-    ; ÇåÀí×ÊÔ´
-    ; ÊÍ·ÅÒôÆµ»º³åÇø
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
+    ; ï¿½Í·ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     invoke waveInUnprepareHeader, $hWaveIn, offset $wHdr, sizeof WAVEHDR
     invoke GetProcessHeap
     invoke HeapFree, eax, 0, $pBuffer
@@ -323,48 +323,48 @@ _free_micro PROC C
     ret
 _free_micro ENDP
 
-    ; ³õÊ¼»¯Â¼Òô
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½Â¼ï¿½ï¿½
 _init_micro PROC C
-    ; ³õÊ¼»¯WAVEFORMATEX½á¹¹Ìå
-    mov    $waveform.wFormatTag,      WAVE_FORMAT_PCM                       ; ÉèÖÃÒôÆµ¸ñÊ½±êÇ©ÎªPCM
-    mov    $waveform.nChannels,       1                                     ; ÉèÖÃÉùµÀÊýÎª1£¨µ¥ÉùµÀ£©
-    mov    $waveform.nSamplesPerSec,  44100                                 ; ÉèÖÃ²ÉÑùÂÊÎª 44100 Hz
-    mov    $waveform.nAvgBytesPerSec, 88200                                 ; ÉèÖÃÆ½¾ùÊý¾Ý´«ÊäËÙÂÊ£¨Ã¿Ãë×Ö½ÚÊý£©
-    mov    $waveform.nBlockAlign,     2                                     ; ÉèÖÃÊý¾Ý¿é¶ÔÆë´óÐ¡ 8*1/8
-    mov    $waveform.wBitsPerSample,  16                                    ; ÉèÖÃÃ¿¸ö²ÉÑùµÄÎ»Êý
-    mov    $waveform.cbSize,          0                                     ; ÉèÖÃ¸½¼ÓÐÅÏ¢µÄ´óÐ¡
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½WAVEFORMATEXï¿½á¹¹ï¿½ï¿½
+    mov    $waveform.wFormatTag,      WAVE_FORMAT_PCM                       ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½Ê½ï¿½ï¿½Ç©ÎªPCM
+    mov    $waveform.nChannels,       1                                     ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    mov    $waveform.nSamplesPerSec,  44100                                 ; ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½Îª 44100 Hz
+    mov    $waveform.nAvgBytesPerSec, 88200                                 ; ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê£ï¿½Ã¿ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
+    mov    $waveform.nBlockAlign,     2                                     ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ 8*1/8
+    mov    $waveform.wBitsPerSample,  16                                    ; ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    mov    $waveform.cbSize,          0                                     ; ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ä´ï¿½Ð¡
 
-    ; ÏÔÊ¾ÌáÊ¾ÐÅÏ¢
+    ; ï¿½ï¿½Ê¾ï¿½ï¿½Ê¾ï¿½ï¿½Ï¢
     ;invoke crt_printf, offset szFmtStr, offset prompt
-    ; ÊäÈëÉè±¸¸öÊý
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½
     invoke waveInGetNumDevs
     ;invoke crt_printf, offset szFmtDevNum, eax
 .if eax == 0
     invoke crt_exit
 .endif
 
-    ; ´´½¨Â¼ÒôÏß³Ì
+    ; ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ß³ï¿½
     invoke CreateThread, NULL, 0, _record_thread, NULL, 0, NULL
     ret
 _init_micro ENDP
 
 
-; ³õÊ¼»¯»Øµ÷
+; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Øµï¿½
 _init PROC
-    ; ³õÊ¼»¯ÊÂ¼þ
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Â¼ï¿½
     invoke CreateEvent, NULL, TRUE, FALSE, NULL
     mov $p_render_buffer_event, eax
     invoke CreateEvent, NULL, TRUE, FALSE, NULL
     mov $p_render_window_event, eax
 
-    ; ³õÊ¼»¯äÖÈ¾Ä£¿é
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½È¾Ä£ï¿½ï¿½
     invoke _init_render
-    ; ³õÊ¼»¯ÓÎÏ·×´Ì¬
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ï·×´Ì¬
     invoke _init_state
-    ; ³õÊ¼»¯Âó¿Ë·çÊäÈëÄ£¿é
+    ; ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
     invoke _init_micro
 
-    ; Æô¶¯Ïß³Ì
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
     mov $thread_live, 1
     invoke CreateThread, NULL, 0, _refresh_interval_thread, NULL , 0, NULL
     invoke CreateThread, NULL, 0, _render_buffer_thread, NULL, 0, NULL
@@ -373,24 +373,24 @@ _init PROC
 _init ENDP
 
 
-; ¹Ø±Õ»Øµ÷
+; ï¿½Ø±Õ»Øµï¿½
 _close PROC
-    ; ¹Ø±ÕÏß³Ì
+    ; ï¿½Ø±ï¿½ï¿½ß³ï¿½
     mov $thread_live, 0
 
-    ; ÊÍ·ÅäÖÈ¾Ä£¿é
+    ; ï¿½Í·ï¿½ï¿½ï¿½È¾Ä£ï¿½ï¿½
     invoke _free_render
 
-    ; ÊÍ·ÅÂó¿Ë·çÄ£¿é
+    ; ï¿½Í·ï¿½ï¿½ï¿½Ë·ï¿½Ä£ï¿½ï¿½
     invoke _free_micro
 
-    ; ¿ÉÄÜÐèÒªÒ»¸öÊÍ·Å×´Ì¬µÄ
+    ; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÒªÒ»ï¿½ï¿½ï¿½Í·ï¿½×´Ì¬ï¿½ï¿½
 
-    ; ÊÍ·ÅÊÂ¼þ
+    ; ï¿½Í·ï¿½ï¿½Â¼ï¿½
     invoke CloseHandle, $p_render_window_event
     invoke CloseHandle, $p_render_buffer_event
 
-    ; ¹Ø±Õ´°¿Ú
+    ; ï¿½Ø±Õ´ï¿½ï¿½ï¿½
     invoke DestroyWindow, $h_window_main
     invoke PostQuitMessage, NULL
 
@@ -398,7 +398,7 @@ _close PROC
 _close ENDP
 
 
-; Ö÷´°¿Ú»Øµ÷
+; ï¿½ï¿½ï¿½ï¿½ï¿½Ú»Øµï¿½
 _main_window_proc PROC @h_instance, @msg, @wParam, @lParam
     mov eax, @msg
     .if eax == WM_CREATE
@@ -414,7 +414,7 @@ _main_window_proc PROC @h_instance, @msg, @wParam, @lParam
     ret
 _main_window_proc ENDP
 
-; Ö÷´°¿Ú
+; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 _main_window PROC 
     local @window_class:WNDCLASSEX
     local @rect:RECT
