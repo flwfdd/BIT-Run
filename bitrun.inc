@@ -25,15 +25,19 @@ JUMP_VY    EQU 800      ; 鹅初始弹跳速度
 G          EQU 1530     ; 游戏内部重力加速度
 JUMPA      EQU 500      ; 弹跳辅助加速度
 
-INTERVAL_MIN EQU  600   ; 障碍物随机间隔最小值
-INTERVAL_MAX EQU  900   ; 障碍物随机间隔最大值
+INTERVAL_MIN EQU  250   ; 障碍物随机间隔最小值
+INTERVAL_MAX EQU  440   ; 障碍物随机间隔最大值
 
-BIRD_HEIGHT_MIN EQU  128  ; 鸟高度最小值
-BIRD_HEIGHT_MAX EQU  500  ; 鸟高度最大值
+BIRD_HEIGHT_MIN EQU  128  ; 鸟高度最小值(都是相对于地面)
+BIRD_HEIGHT_MAX EQU  350  ; 鸟高度最大值
 
-BIRD_VX     EQU  0       ; 鸟相对于地面的速度
+CLOUD_HEIGHT_MIN EQU 450 ;  云层高度最小值（相对于窗口）
+CLOUD_HEIGHT_MAX EQU 550 ;  云层高度最大值
 
-CLOUD_VX    EQU  -40      ; 云相对于地面的速度
+BIRD_VX     EQU  10       ; 鸟相对于地面的速度
+
+CLOUD_VX    EQU  80      ; 云相对于地面的速度(不要用负数)
+CLOUD_INTERVAL EQU  250  ; 云最低间隔（最好要大于1/4的窗口宽度）
 
 
 
@@ -70,10 +74,16 @@ OBJ_CLOUD EQU 3
 
 OBJ_BIRD      EQU 4
 OBJ_BADGE     EQU 5
-OBJ_DEBUG1    EQU 6
+OBJ_GYM       EQU 6
+OBJ_MUSEUM    EQU 7
+OBJ_LIBRARY   EQU 8
+OBJ_STONE     EQU 9
+OBJ_GATE      EQU 10
+
 
 OBSTACLE_START EQU $
-$obj_array dword OBJ_BIRD, IMAGE_BIRD0_ID, OBJ_BADGE, IMAGE_BIT_BADGE_ID, OBJ_DEBUG1, IMAGE_GOOSE_STAND_ID
+$obj_array dword OBJ_BIRD , IMAGE_BIRD0_ID , OBJ_BADGE , IMAGE_BIT_BADGE_ID , OBJ_GYM , IMAGE_GYM_ID , OBJ_MUSEUM , IMAGE_MUSEUM_ID , OBJ_LIBRARY , IMAGE_LIBRARY_ID , OBJ_STONE , IMAGE_STONE_ID , OBJ_GATE , IMAGE_GATE_ID
+
 OBSTACLE_END   EQU $
 OBSTACLE_NUM   EQU (OBSTACLE_END-OBSTACLE_START)/8
 

@@ -115,7 +115,7 @@ _init_state PROC uses ecx
 	mov @Bkg1.obj_id,OBJ_BKG
 	RobjLoadx @Bkg1,0
 	RobjLoady @Bkg1,0
-	mov @Bkg1.z,3
+	mov @Bkg1.z,2
 	invoke _get_image, IMAGE_BACKGROUND_ID
 	mov @Bkg1.p_image,eax
 	m2m @Bkg1.vx,$state.global_vx
@@ -126,7 +126,7 @@ _init_state PROC uses ecx
 	mov @Bkg2.obj_id,OBJ_BKG
 	RobjLoadx @Bkg2,WINDOW_WIDTH
 	RobjLoady @Bkg2,0
-	mov @Bkg2.z,3
+	mov @Bkg2.z,2
 	invoke _get_image, IMAGE_BACKGROUND_ID
 	mov @Bkg2.p_image,eax
 	m2m @Bkg2.vx,$state.global_vx
@@ -571,7 +571,7 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 	mov @iscollide,0
 	mov ecx,0
 	.while ecx!=$state.render_object_size
-		.if [esi+RenderObject.obj_id] == OBJ_GOOSE || [esi+RenderObject.obj_id]==OBJ_BKG
+		.if [esi+RenderObject.obj_id] == OBJ_GOOSE || [esi+RenderObject.obj_id]==OBJ_BKG || [esi+RenderObject.obj_id]==OBJ_CLOUD
 			inc ecx
 			add esi, sizeof RenderObject
 			.continue
@@ -599,6 +599,7 @@ _update_goose ENDP
 _update_obstacles PROC uses ecx esi edx ebx
 	local @cloud:RenderObject		; 待添加的云
 	local @lastcloudx:dword			; 新增云的x坐标
+	local @ncloud:dword				; 绘制列表中云的数量
 	local @obstacle:RenderObject    ; 待添加的障碍物
 	local @lastobstaclex:dword		; 新增障碍物x坐标
 	local @curtime:dword			; 当前时间，用于统一时间戳
@@ -611,22 +612,86 @@ _update_obstacles PROC uses ecx esi edx ebx
 		ret
 	.endif
 
-	push eax
-	push ecx
-	szText @debugstr3,"current num %d "
-	invoke crt_printf,addr @debugstr3,$state.render_object_size
-	pop ecx
-	pop eax
-
+	mov @ncloud,0
 	mov @lastcloudx,0
 	mov @lastobstaclex,0
 	m2m @curtime,$state.time
 	mov esi, $state.p_a_render_object
+
 	mov ecx,RENDER_OBJ_SIZE
 	sub ecx,$state.render_object_size
 	mov @remain,ecx
 
-	; 查找排在最后面的云，并添加一朵新的云 TODO
+	invoke crt_time,0
+	invoke srand,eax
+
+	; 查找排在最后面的云，并添加一朵新的云 
+	mov edx, $state.render_object_size
+	.while edx != 0
+	 	m2m @id,[esi+RenderObject.obj_id]
+		.if  @id==OBJ_CLOUD
+			inc @ncloud
+			mov eax,[esi+RenderObject.x] 
+			cmp eax,0
+			jle @label1_u_o
+				.if eax > @lastcloudx
+					mov @lastcloudx,eax
+				.endif
+			@label1_u_o:
+		.endif
+		add esi, sizeof RenderObject
+		dec edx
+	.endw
+	; 如果没有找到云，则将lastcloudx设置为WINDOW_WIDTH
+	.if @lastcloudx == 0
+		mov @lastcloudx,WINDOW_WIDTH
+	.endif
+
+	; 最多容许添加4个云
+	.if @ncloud < 4
+		mov eax,4
+		sub eax,@ncloud
+		mov @ncloud,eax
+		.while @ncloud !=0
+			mov @cloud.obj_id,OBJ_CLOUD
+
+			mov eax,IMAGE_CLOUD_ID
+			invoke _get_image,eax
+			mov @cloud.p_image,eax
+
+			invoke crt_rand
+			xor edx,edx
+			mov ebx,WINDOW_WIDTH
+			div ebx
+			mov eax,edx
+			add @lastcloudx,eax
+			add @lastcloudx,CLOUD_INTERVAL
+
+			mov eax,@lastcloudx
+			RobjLoadx @cloud,eax
+
+			invoke crt_rand
+			xor edx,edx
+			mov ebx, CLOUD_HEIGHT_MAX-CLOUD_HEIGHT_MIN
+			div ebx
+			mov eax,edx
+			add eax,CLOUD_HEIGHT_MIN
+			RobjLoady @cloud,eax
+
+			mov @cloud.z,0
+
+			fld  $state.global_vx
+			fldI CLOUD_VX
+			faddp st(1),st
+			fstp @cloud.vx
+
+			mov @cloud.vy,0
+			m2m @cloud.lasttsp,@curtime
+			invoke _add_render_object,addr @cloud
+			
+			dec @ncloud
+		.endw
+	.endif
 
 
 	; 查找到在最后面的障碍物的坐标
@@ -640,14 +705,14 @@ _update_obstacles PROC uses ecx esi edx ebx
 			.continue
 		.endif
 
-		; 由于在之前已经剔除了在窗口左侧的物品，此处不用担心有符号比较问题
 		mov eax,[esi+RenderObject.x] 
-		; 注意这里也有负数比较
 		cmp eax,0
-		jle @label1_u_o
+		jle @label2_u_o
 			; 如果这个障碍物在窗口内，则更新lastobstaclex
-			m2m @lastobstaclex,[esi+RenderObject.x]
-		@label1_u_o:
+			.if eax > @lastobstaclex
+				mov @lastobstaclex,eax
+			.endif
+		@label2_u_o:
 
 		add esi, sizeof RenderObject
 		dec edx
@@ -658,17 +723,6 @@ _update_obstacles PROC uses ecx esi edx ebx
 		mov @lastobstaclex,WINDOW_WIDTH
 	.endif
 
-
-	push eax
-	push ecx
-	szText @debugstr2,"find last at obstacle at %d"
-	invoke crt_printf,addr @debugstr2,@lastobstaclex
-	pop ecx
-	pop eax
-
-	
-	invoke crt_time,0
-	invoke srand,eax
 
 	
 	; 新添加的障碍物
@@ -702,20 +756,13 @@ _update_obstacles PROC uses ecx esi edx ebx
 		mov eax,@lastobstaclex
 
 		;DEBUG 固定间隔
-		mov eax,WINDOW_WIDTH
-		add @lastobstaclex,eax
-		mov eax,@lastobstaclex
+		;mov eax,WINDOW_WIDTH
+		;add @lastobstaclex,eax
+		;mov eax,@lastobstaclex
 
 
 		; 初始化这个对象，并将其添加到绘制队列中
 		RobjLoadx @obstacle,eax
-
-		push eax
-		push ecx
-		szText @debugstr1,"adding a obstacle at %d"
-		invoke crt_printf,addr @debugstr1,eax
-		pop ecx
-		pop eax
 
 
 		.if @obstacle.obj_id == OBJ_BIRD
@@ -725,6 +772,7 @@ _update_obstacles PROC uses ecx esi edx ebx
 			mov ebx, BIRD_HEIGHT_MAX-BIRD_HEIGHT_MIN
 			div ebx
 			mov eax,edx
+			add eax,BIRD_HEIGHT_MIN
 			add eax,HORIZON_HEIGHT
 			RobjLoady @obstacle,eax
 
