@@ -48,7 +48,7 @@ a_render_object_test RenderObject 10 dup (<>) ; 渲染对象数组
 x_text dword 0
 
 $state_jumping  dword 0;鹅是否滞空
-;$state_keypress  word 0;上一次检测到的按键输入(word->SHORT)
+$state_keypress  word 0;上一次检测到的按键输入(word->SHORT)
 $state_voiceinput  dword 0;上一次检测到的按键输入(word->SHORT)
 
 
@@ -80,7 +80,7 @@ _init_state PROC uses ecx
 	local @Bkg2:RenderObject
 
 	mov $state_jumping,0
-	; mov $state_keypress,0
+	mov $state_keypress,0
 	mov $state_voiceinput,0
 	mov $state.score, 0
 	mov $state.status,GAME_STATUS_INIT
@@ -211,10 +211,10 @@ _state_update ENDP
 
 ; 检查按键
 _check_key_down PROC uses ecx edi edx
-	; local @keystate:word
-	; invoke GetAsyncKeyState, VK_SPACE
-	; mov  @keystate,ax
-	.if $voice_input != 0
+	local @keystate:word
+	invoke GetAsyncKeyState, VK_SPACE
+	mov  @keystate,ax
+	.if $voice_input || ax != 0
 		;DEBUG
 		;szText debugstr1,"detect key pressed"
 		;invoke crt_printf,addr debugstr1
@@ -256,7 +256,7 @@ _check_key_down PROC uses ecx edi edx
 
 		.if $state.status == GAME_STATUS_OVER
 			; .if $state_keypress == 0
-			.if $state_voiceinput == 0
+			.if $state_voiceinput || $state_keypress == 0
 				invoke _reset_state
 			.endif
 		.endif
@@ -267,8 +267,8 @@ _check_key_down PROC uses ecx edi edx
 	; 	invoke crt_printf,addr debugstr2
 	.endif
 
-	; mov cx, @keystate
-	; mov $state_keypress,cx
+	mov cx, @keystate
+	mov $state_keypress,cx
 	mov ecx, $voice_input
 	mov $state_voiceinput,ecx
 
@@ -495,8 +495,8 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 		fstp @fdeltat
 
 		; 加载加速度
-		; movzx eax,$state_keypress
-		mov eax,$state_voiceinput
+		movzx eax,$state_keypress
+		or eax,$state_voiceinput 
 		.if eax != 0
 			mov eax,G
 			sub eax,JUMPA
