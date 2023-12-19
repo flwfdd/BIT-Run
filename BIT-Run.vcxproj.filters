@@ -18,6 +18,9 @@
     <None Include="bitrun.inc">
       <Filter>源文件</Filter>
     </None>
+    <None Include="floatop.inc">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm">

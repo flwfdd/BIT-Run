@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="bitrun.inc" />
+    <None Include="floatop.inc" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />

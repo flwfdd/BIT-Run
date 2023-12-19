@@ -15,6 +15,7 @@ typedef struct GameState{
     int status;
     int time;
     int score;
+    int highest_score;
     int background_color;
     int render_object_size;
     RenderObject* a_p_render_object;

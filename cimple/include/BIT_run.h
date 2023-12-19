@@ -14,9 +14,11 @@
 #define GOOSE_INITIAL_Y HORIZON_HEIGHT
 #define GOOSE_INTERVAL 0x100
 
+#define SCORE_RATIO  0.01
+
 #define FPS 100
 
-#define GINITVX 400.0  // global init vx
+#define GINITVX 400  // global init vx
 #define JUMPVY 800.0
 
 #define G      1530.0

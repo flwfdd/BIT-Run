@@ -3,6 +3,7 @@
 option casemap:none
 
 include     bitrun.inc
+include     floatop.inc
 include		windows.inc
 include		user32.inc
 includelib	user32.lib
@@ -36,6 +37,10 @@ _update_render_list PROTO @isOver   :DWORD;更新绘制列表（剔除已经出界的对象）
 _update_render_object  PROTO @p_robj :DWORD;更新绘制对象
 _update_goose 	       PROTO @p_goose:DWORD;专门更新大鹅
 
+
+; 在更新状态时随机添加若干障碍物
+_update_obstacles   PROTO 
+
 .data
 
 ; DEBUG 渲染对象
@@ -57,15 +62,6 @@ m2m  MACRO M1,M2
 	pop  M1
 ENDM
 
-; 加载一个立即数到寄存器栈宏（fild好像不行）
-fldI  MACRO IMD
-	push eax ; 保存eax
-	mov eax,IMD
-	push eax
-	fild dword ptr [esp]
-	pop eax  ; 维护栈平衡
-	pop eax  ; 恢复eax
-ENDM
 
 ; 用于快速定义字符串DEBUG
 szText MACRO Name, Text:VARARG
@@ -76,6 +72,7 @@ LOCAL lbl
 ENDM
 
 
+; 初始化状态
 _init_state PROC uses ecx
 	local @Goose:RenderObject
 	local @Bkg1:RenderObject
@@ -104,71 +101,38 @@ _init_state PROC uses ecx
 
 	; 创建一个鹅
 	mov @Goose.obj_id,OBJ_GOOSE
-	mov @Goose.x,GOOSE_INITIAL_X
-	mov @Goose.y,GOOSE_INITIAL_Y
+	RobjLoadx @Goose,GOOSE_INITIAL_X
+	RobjLoady @Goose,GOOSE_INITIAL_Y
 	mov @Goose.z,1
-	
 	invoke _get_image, IMAGE_GOOSE_RUN0_ID
 	mov @Goose.p_image,eax
-
-	fldz
-	fstp @Goose.vx
-	fldz
-	fstp @Goose.vy
-	fldI GOOSE_INITIAL_X
-	fstp @Goose.phsx
-	fldI GOOSE_INITIAL_Y
-	fstp @Goose.phsy
-
-	mov eax,$state.time
-	mov @Goose.lasttsp,eax
+	mov @Goose.vx,0
+	mov @Goose.vy,0
+	m2m  @Goose.lasttsp,$state.time
 
 	;创建两个背景循环绘制
+	;背景1
 	mov @Bkg1.obj_id,OBJ_BKG
-	mov @Bkg1.x,0
-	mov @Bkg1.y,0
-	mov @Bkg1.z,0
+	RobjLoadx @Bkg1,0
+	RobjLoady @Bkg1,0
+	mov @Bkg1.z,3
 	invoke _get_image, IMAGE_BACKGROUND_ID
 	mov @Bkg1.p_image,eax
+	m2m @Bkg1.vx,$state.global_vx
+	mov @Bkg1.vy,0
+	m2m @Bkg1.lasttsp,$state.time
 
-	mov eax, $state.global_vx
-	push eax
-	fld dword ptr [esp]
-	fstp @Bkg1.vx
-	pop eax
-	fldz
-	fstp @Bkg1.vy
-	fldz
-	fstp @Bkg1.phsx
-	fldz
-	fstp @Bkg1.phsy
-	mov eax,$state.time
-	mov @Bkg1.lasttsp,eax
-
-
+	;背景2
 	mov @Bkg2.obj_id,OBJ_BKG
-	mov @Bkg2.x,WINDOW_WIDTH
-	mov @Bkg2.y,0
-	mov @Bkg2.z,0
+	RobjLoadx @Bkg2,WINDOW_WIDTH
+	RobjLoady @Bkg2,0
+	mov @Bkg2.z,3
 	invoke _get_image, IMAGE_BACKGROUND_ID
 	mov @Bkg2.p_image,eax
-	finit
-	mov eax, $state.global_vx
-	push eax
-	fld dword ptr [esp]
-	fstp @Bkg2.vx
-	pop eax
-	fldz
-	fstp @Bkg2.vy
-	mov eax, WINDOW_WIDTH
-	push eax
-	fild dword ptr [esp]
-	fstp @Bkg2.phsx
-	pop eax
-	fldz
-	fstp @Bkg2.phsy
-	mov eax,$state.time
-	mov @Bkg2.lasttsp,eax
+	m2m @Bkg2.vx,$state.global_vx
+	mov @Bkg2.vy,0
+	m2m @Bkg2.lasttsp,$state.time
+
 
 	; 将上述创建的背景，鹅加入到绘制列表中
 	invoke _add_render_object, addr @Goose
@@ -178,11 +142,13 @@ _init_state PROC uses ecx
 	ret
 _init_state ENDP
 
+; 重置状态
 _reset_state PROC
 	invoke crt_free,$state.p_a_render_object
 	invoke _init_state
 _reset_state ENDP
 
+; 统一绘制对象更新时间
 _start_state PROC uses ecx edi edx
 
     ; align the timestamp
@@ -204,16 +170,9 @@ _start_state PROC uses ecx edi edx
 
 _start_state ENDP
 
-
-
 ; 更新状态
 _state_update PROC uses ebx esi
 	local @collide
-	;DEBUG 使用的3个鸟
-	local @DEBUGbird1:RenderObject
-	local @DEBUGbird2:RenderObject
-	local @DEBUGbird3:RenderObject
-
 
 
 	mov @collide,0
@@ -242,82 +201,13 @@ _state_update PROC uses ebx esi
 	; 根据是否发生碰撞更新绘制列表
 	invoke _update_render_list,@collide
 
-
-	; 这里编写添加对象的策略，这里仅仅是无限的添加3个鸟
-	; TODO：初始化float成员写个宏还是
-	.if $state.render_object_size <= 3
-
-	mov @DEBUGbird1.obj_id,OBJ_BIRD
-	mov @DEBUGbird1.x,WINDOW_WIDTH
-	mov @DEBUGbird1.y,HORIZON_HEIGHT
-	mov @DEBUGbird1.z,1
-	invoke _get_image,IMAGE_BIRD0_ID
-	mov @DEBUGbird1.p_image,eax
-	fld $state.global_vx
-	fstp @DEBUGbird1.vx
-	fldz
-	fstp @DEBUGbird1.vy
-	fldI WINDOW_WIDTH
-	fstp @DEBUGbird1.phsx
-	fldI HORIZON_HEIGHT
-	fstp @DEBUGbird1.phsy
-	m2m @DEBUGbird1.lasttsp,$state.time
-
-
-	mov @DEBUGbird2.obj_id,OBJ_BIRD
-	mov @DEBUGbird2.x,WINDOW_WIDTH
-	add @DEBUGbird2.x,100
-	mov @DEBUGbird2.y,HORIZON_HEIGHT
-	mov @DEBUGbird2.z,1
-	invoke _get_image,IMAGE_BIRD0_ID
-	mov @DEBUGbird2.p_image,eax
-	fld $state.global_vx
-	fstp @DEBUGbird2.vx
-	fldz
-	fstp @DEBUGbird2.vy
-	fldI WINDOW_WIDTH
-	fldI 100
-	faddp st(1),st
-	fstp @DEBUGbird2.phsx
-	fldI HORIZON_HEIGHT
-	fstp @DEBUGbird2.phsy
-	m2m @DEBUGbird2.lasttsp,$state.time
-
-
-	mov @DEBUGbird3.obj_id,OBJ_BIRD
-	mov @DEBUGbird3.x,WINDOW_WIDTH
-	add @DEBUGbird3.x,300
-	mov @DEBUGbird3.y,HORIZON_HEIGHT
-	mov @DEBUGbird3.z,1
-	invoke _get_image,IMAGE_BIRD0_ID
-	mov @DEBUGbird3.p_image,eax
-	fld $state.global_vx
-	fstp @DEBUGbird3.vx
-	fldz
-	fstp @DEBUGbird3.vy
-	fldI WINDOW_WIDTH
-	fldI 300
-	faddp st(1),st
-	fstp @DEBUGbird3.phsx
-	fldI HORIZON_HEIGHT
-	fstp @DEBUGbird3.phsy
-	m2m @DEBUGbird3.lasttsp,$state.time
-
-	
-
-	invoke _add_render_object, addr @DEBUGbird1
-	invoke _add_render_object, addr @DEBUGbird2
-	invoke _add_render_object, addr @DEBUGbird3
-
-	.endif
-
+	; 根据绘制状态添加屏幕外准备出现的障碍物
+	invoke _update_obstacles
 	
  	ret
 _state_update ENDP
 
-
-
-
+; 检查按键
 _check_key_down PROC uses ecx edi edx
 	local @keystate:word
 	invoke GetAsyncKeyState, VK_SPACE
@@ -384,7 +274,7 @@ _check_key_down ENDP
 
 
 ; 对绘制列表的操作
-
+; 初始化绘制列表
 _init_render_list PROC uses ecx @p_a_rlist:DWORD
 
 	mov eax, sizeof RenderObject
@@ -394,6 +284,7 @@ _init_render_list PROC uses ecx @p_a_rlist:DWORD
 	ret
 _init_render_list ENDP
 
+; 更新绘制列表
 _update_render_list PROC uses ecx @isOver:DWORD
 	local @pOldL: dword  
 	local @pNewL: dword
@@ -700,5 +591,166 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 	ret
 
 _update_goose ENDP
+
+
+
+; 绘制对象添加
+
+_update_obstacles PROC uses ecx esi edx ebx
+	local @cloud:RenderObject		; 待添加的云
+	local @lastcloudx:dword			; 新增云的x坐标
+	local @obstacle:RenderObject    ; 待添加的障碍物
+	local @lastobstaclex:dword		; 新增障碍物x坐标
+	local @curtime:dword			; 当前时间，用于统一时间戳
+	local @remain:dword				; 剩余的空间
+
+	local @id:dword
+
+
+	.if $state.render_object_size == RENDER_OBJ_SIZE
+		ret
+	.endif
+
+	push eax
+	push ecx
+	szText @debugstr3,"current num %d "
+	invoke crt_printf,addr @debugstr3,$state.render_object_size
+	pop ecx
+	pop eax
+
+	mov @lastcloudx,0
+	mov @lastobstaclex,0
+	m2m @curtime,$state.time
+	mov esi, $state.p_a_render_object
+	mov ecx,RENDER_OBJ_SIZE
+	sub ecx,$state.render_object_size
+	mov @remain,ecx
+
+	; 查找排在最后面的云，并添加一朵新的云 TODO
+
+
+	; 查找到在最后面的障碍物的坐标
+	mov esi, $state.p_a_render_object
+	mov edx, $state.render_object_size
+	.while edx !=0 
+	 	m2m @id,[esi+RenderObject.obj_id]
+		.if @id == OBJ_NONE || @id == OBJ_BKG || @id == OBJ_GOOSE || @id==OBJ_CLOUD
+			add esi, sizeof RenderObject
+			dec edx
+			.continue
+		.endif
+
+		; 由于在之前已经剔除了在窗口左侧的物品，此处不用担心有符号比较问题
+		mov eax,[esi+RenderObject.x] 
+		; 注意这里也有负数比较
+		cmp eax,0
+		jle @label1_u_o
+			; 如果这个障碍物在窗口内，则更新lastobstaclex
+			m2m @lastobstaclex,[esi+RenderObject.x]
+		@label1_u_o:
+
+		add esi, sizeof RenderObject
+		dec edx
+	.endw
+
+	; 如果没有找到障碍物，则将lastobstaclex设置为WINDOW_WIDTH
+	.if @lastobstaclex == 0
+		mov @lastobstaclex,WINDOW_WIDTH
+	.endif
+
+
+	push eax
+	push ecx
+	szText @debugstr2,"find last at obstacle at %d"
+	invoke crt_printf,addr @debugstr2,@lastobstaclex
+	pop ecx
+	pop eax
+
+	
+	invoke crt_time,0
+	invoke srand,eax
+
+	
+	; 新添加的障碍物
+	.while @remain != 0
+		; 随机生成一个对象ID,获取其对应图片
+		invoke crt_rand
+		xor edx,edx
+		mov ebx,OBSTACLE_NUM
+		div ebx
+		mov eax,edx
+		lea eax,[OBSTACLE_START+8*eax]
+
+		m2m @obstacle.obj_id,[eax]
+		mov eax,[eax+4]
+		invoke _get_image,[eax]
+		mov @obstacle.p_image,eax
+
+		; 随机生成一个新的x坐标
+		invoke crt_rand
+		xor edx,edx
+		mov ebx, INTERVAL_MAX-INTERVAL_MIN
+		div ebx
+		mov eax,edx
+
+		; 用新的x坐标更新lastobstaclex
+		add @lastobstaclex,eax
+		add @lastobstaclex,INTERVAL_MIN
+		mov eax,@obstacle.p_image
+		mov eax,[eax+Image.w]
+		add @lastobstaclex,eax
+		mov eax,@lastobstaclex
+
+		;DEBUG 固定间隔
+		mov eax,WINDOW_WIDTH
+		add @lastobstaclex,eax
+		mov eax,@lastobstaclex
+
+
+		; 初始化这个对象，并将其添加到绘制队列中
+		RobjLoadx @obstacle,eax
+
+		push eax
+		push ecx
+		szText @debugstr1,"adding a obstacle at %d"
+		invoke crt_printf,addr @debugstr1,eax
+		pop ecx
+		pop eax
+
+
+		.if @obstacle.obj_id == OBJ_BIRD
+			;如果是鸟需要添加随机高度
+			invoke crt_rand
+			xor edx,edx
+			mov ebx, BIRD_HEIGHT_MAX-BIRD_HEIGHT_MIN
+			div ebx
+			mov eax,edx
+			add eax,HORIZON_HEIGHT
+			RobjLoady @obstacle,eax
+
+			;和相对速度
+			fldI BIRD_VX
+			fchs
+			fld $state.global_vx
+			faddp st(1),st
+			fstp @obstacle.vx
+		.else
+			RobjLoady @obstacle,HORIZON_HEIGHT
+			m2m @obstacle.vx,$state.global_vx
+		.endif
+		mov @obstacle.vy,0
+		m2m @obstacle.lasttsp,@curtime
+
+		mov @obstacle.z,1
+
+		;将这个对象添加到绘制列表中
+		invoke _add_render_object,addr @obstacle
+
+		dec @remain
+	.endw
+
+	ret
+
+_update_obstacles ENDP 
 
 end

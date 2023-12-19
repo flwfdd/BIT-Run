@@ -90,7 +90,7 @@ _refresh_interval_thread PROC
         .if eax > dword ptr @time1
             ; 时候未到
 			sub eax, dword ptr @time1
-			invoke Sleep, eax
+			;invoke Sleep, eax
         .else
             ; DEBUG 每个周期打印一个.
             invoke crt_putchar, '.'
