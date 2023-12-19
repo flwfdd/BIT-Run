@@ -105,7 +105,7 @@ _init_state PROC uses ecx
 	mov @Goose.obj_id,OBJ_GOOSE
 	RobjLoadx @Goose,GOOSE_INITIAL_X
 	RobjLoady @Goose,GOOSE_INITIAL_Y
-	mov @Goose.z,1
+	mov @Goose.z,0
 	invoke _get_image, IMAGE_GOOSE_RUN0_ID
 	mov @Goose.p_image,eax
 	mov @Goose.vx,0
@@ -584,7 +584,7 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 		invoke _check_obj_overlap,@p_goose,esi
 		.if eax !=0
 			mov @iscollide,1
-			;szText debugstr,"collide" 加上这个打印会有bug不知道为啥
+			;szText debugstr,"collide" 加上这个打印会有bug不知道为啥,可能是使用了ecx等寄存器
 			;invoke crt_printf,addr debugstr
 		.endif
 		inc ecx
@@ -683,7 +683,7 @@ _update_obstacles PROC uses ecx esi edx ebx
 			add eax,CLOUD_HEIGHT_MIN
 			RobjLoady @cloud,eax
 
-			mov @cloud.z,0
+			mov @cloud.z,1
 
 			fld  $state.global_vx
 			fldI CLOUD_VX

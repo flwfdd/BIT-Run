@@ -86,7 +86,7 @@
       </AdditionalDependencies>
     </Link>
     <MASM>
-      <IncludePaths>C:\masm32\include</IncludePaths>
+      <IncludePaths>C:\masm32\include;%(IncludePaths)</IncludePaths>
     </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

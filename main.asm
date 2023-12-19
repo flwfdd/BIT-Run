@@ -226,9 +226,9 @@ _micro_get_volume ENDP
 _change_voice_state PROC ,hwi: dword, uMsg: dword, dwInstance: ptr dword, dwParam1: ptr dword, dwParam2: ptr dword
 
     .if uMsg == WIM_OPEN
-        invoke crt_printf, offset szFmtStr, offset szOpen
+        ;invoke crt_printf, offset szFmtStr, offset szOpen
     .elseif uMsg == WIM_CLOSE
-        invoke crt_printf, offset szFmtStr, offset szClose
+        ;invoke crt_printf, offset szFmtStr, offset szClose
     .elseif uMsg == WIM_DATA
         cmp    $bStop, 1
         je     @end
@@ -247,18 +247,18 @@ _change_voice_state PROC ,hwi: dword, uMsg: dword, dwInstance: ptr dword, dwPara
         invoke waveInAddBuffer, hwi, dwParam1, sizeof WAVEHDR
 .endif
     ; 获取程序结束时间
-    invoke GetTickCount
-    mov    endTime, eax
+    ; invoke GetTickCount
+    ; mov    endTime, eax
 
     ; 计算执行时间差值
-    sub    eax, startTime
-    mov    elapsedTime, eax
+    ; sub    eax, startTime
+    ; mov    elapsedTime, eax
 
     ; 打印执行时间
     ;  invoke crt_printf, OFFSET timeFormat,  elapsedTime
     ; 重新计时
-    invoke GetTickCount
-    mov    startTime, eax
+    ; invoke GetTickCount
+    ; mov    startTime, eax
 @end:
     ret
 _change_voice_state ENDP
@@ -269,8 +269,8 @@ _record_thread PROC
     mov    ebp, esp
 
     ; 获取程序开始时间
-    invoke GetTickCount
-    mov    startTime, eax
+    ; invoke GetTickCount
+    ; mov    startTime, eax
 
     ; 打开默认音频输入设备
     invoke waveInOpen, offset $hWaveIn, WAVE_MAPPER, offset $waveform, _change_voice_state, 0, CALLBACK_FUNCTION
@@ -335,10 +335,10 @@ _init_micro PROC C
     mov    $waveform.cbSize,          0                                     ; 设置附加信息的大小
 
     ; 显示提示信息
-    invoke crt_printf, offset szFmtStr, offset prompt
+    ;invoke crt_printf, offset szFmtStr, offset prompt
     ; 输入设备个数
     invoke waveInGetNumDevs
-    invoke crt_printf, offset szFmtDevNum, eax
+    ;invoke crt_printf, offset szFmtDevNum, eax
 .if eax == 0
     invoke crt_exit
 .endif
