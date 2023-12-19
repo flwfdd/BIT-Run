@@ -51,6 +51,7 @@ $state_jumping  dword 0;鹅是否滞空
 $state_keypress  word 0;上一次检测到的按键输入(word->SHORT)
 $state_voiceinput  dword 0;上一次检测到的按键输入(word->SHORT)
 
+$state_lastaccer dword 0;用于记录上一次加速
 
 FLOATSCONST1 REAL4 0.001
 FLOATSCONST2 REAL4 0.5
