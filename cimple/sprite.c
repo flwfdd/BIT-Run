@@ -109,7 +109,7 @@ void _state_update(){
                 .x = WINDOW_WIDTH,
                 .y = HORIZON_HEIGHT,
                 .z = 1,
-                .p_image = _get_image("./image/tower25x50.bmp"),
+                .p_image = _get_image("./image/bird1.bmp"),
                 .vx = state.global_vx,
                 .vy = 0,
                 .phsx = WINDOW_WIDTH,
@@ -123,7 +123,7 @@ void _state_update(){
                 .x = WINDOW_WIDTH+100,
                 .y = HORIZON_HEIGHT,
                 .z = 1,
-                .p_image = _get_image("./image/tower25x50.bmp"),
+                .p_image = _get_image("./image/bird1.bmp"),
                 .vx = state.global_vx-20,
                 .vy = 0,
                 .phsx = WINDOW_WIDTH+100,
@@ -136,7 +136,7 @@ void _state_update(){
                 .x = WINDOW_WIDTH+300,
                 .y = HORIZON_HEIGHT,
                 .z = 1,
-                .p_image = _get_image("./image/tower25x50.bmp"),
+                .p_image = _get_image("./image/bird1.bmp"),
                 .vx = state.global_vx,
                 .vy = 0,
                 .phsx = WINDOW_WIDTH+300,
@@ -284,17 +284,6 @@ int _update_render_object(RenderObject *p_robj) {
 
 int _update_goose(RenderObject *p_goose){
 
-    // check collision
-    int iscollide=0;
-    RenderObject *p_robj = state.a_p_render_object;
-    for (int i = 0; i < state.render_object_size; ++i,p_robj++) {
-        if(p_robj->obj_id==OBJ_GOOSE||p_robj->obj_id==OBJ_BKG)
-            continue;
-        if(_check_obj_overlap(p_goose,p_robj)){
-            printf("detect collision!\n");
-            iscollide = 1;
-        }
-    }
 
     if(!jumping){
         if(state.time&GOOSE_INTERVAL)
@@ -325,6 +314,18 @@ int _update_goose(RenderObject *p_goose){
 
 
     p_goose->lasttstp = state.time;
+
+    // check collision
+    int iscollide=0;
+    RenderObject *p_robj = state.a_p_render_object;
+    for (int i = 0; i < state.render_object_size; ++i,p_robj++) {
+        if(p_robj->obj_id==OBJ_GOOSE||p_robj->obj_id==OBJ_BKG)
+            continue;
+        if(_check_obj_overlap(p_goose,p_robj)){
+            printf("detect collision!\n");
+            iscollide = 1;
+        }
+    }
 
     return iscollide;
 }
@@ -360,29 +361,30 @@ int _check_obj_overlap(RenderObject *p_obj1, RenderObject *p_obj2) {
     Image* p_image2 = p_obj2->p_image;
     RECT obj1_rect, obj2_rect, overlap_rect;
 
+    // 这里汇编有点问题要改
     // 快速判断矩形框是否重叠
     // 1完全在2左侧
     obj1_rect.left  = p_obj1->x;
-    obj1_rect.right = p_obj1->x + p_image1->w - 1; // Adjusted index
+    obj1_rect.right = p_obj1->x + p_image1->w; // Adjusted index
     if (obj1_rect.right <= p_obj2->x) {
         return 0;
     }
     // 1完全在2右侧
     obj2_rect.left  = p_obj2->x;
-    obj2_rect.right = p_obj2->x + p_image2->w - 1; // Adjusted index
+    obj2_rect.right = p_obj2->x + p_image2->w; // Adjusted index
     if (obj2_rect.right <= p_obj1->x) {
         return 0;
     }
     // 1完全在2下方
     obj1_rect.bottom = p_obj1->y;
-    obj1_rect.top    =  p_obj1->y + p_image1->h - 1; // Adjusted index
+    obj1_rect.top    =  p_obj1->y + p_image1->h; // Adjusted index
     if (obj1_rect.top <= p_obj2->y) {
         return 0;
     }
     // 1完全在2上方
     obj2_rect.bottom = p_obj2->y;
-    obj2_rect.top    = p_obj2->y + p_image2->h - 1; // Adjusted index
-    if (obj2_rect.top <= p_obj1->y) {
+    obj2_rect.top    = p_obj2->y + p_image2->h ; // Adjusted index
+    if (obj2_rect.top <=p_obj1->y) {
         return 0;
     }
 
@@ -399,9 +401,9 @@ int _check_obj_overlap(RenderObject *p_obj1, RenderObject *p_obj2) {
     DrawRectOutline(hdc, obj2_rect);
 
     // 像素判断是否有交叉区域
-    for (int esi_val = overlap_rect.top; esi_val >= overlap_rect.bottom; esi_val--) {
+    for (int esi_val = overlap_rect.top-1; esi_val >= overlap_rect.bottom; esi_val--) {
         for (int edi_val = overlap_rect.left; edi_val < overlap_rect.right; edi_val++) {
-            int obj1_row_index = obj1_rect.top - esi_val;
+            int obj1_row_index = (obj1_rect.top-1) - esi_val;
             int obj1_col_index = edi_val - obj1_rect.left;
             int obj1_offset    = obj1_row_index * p_image1->w + obj1_col_index;
             char* obj1_mask    = p_image1->a_mask;
@@ -410,7 +412,7 @@ int _check_obj_overlap(RenderObject *p_obj1, RenderObject *p_obj2) {
                 continue;
             }
 
-            int obj2_row_index = obj2_rect.top - esi_val;
+            int obj2_row_index = (obj2_rect.top-1) - esi_val;
             int obj2_col_index = edi_val - obj2_rect.left;
             int obj2_offset    = obj2_row_index * p_image2->w + obj2_col_index;
             char* obj2_mask    = p_image2->a_mask;
