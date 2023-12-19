@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />
+    <MASM Include="microwave.asm" />
     <MASM Include="render.asm" />
     <MASM Include="state.asm" />
   </ItemGroup>

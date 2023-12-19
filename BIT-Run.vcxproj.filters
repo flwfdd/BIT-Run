@@ -29,6 +29,9 @@
     <MASM Include="state.asm">
       <Filter>源文件</Filter>
     </MASM>
+    <MASM Include="microwave.asm">
+      <Filter>源文件</Filter>
+    </MASM>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
