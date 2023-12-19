@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ Éú³ÉµÄ°üº¬ÎÄ¼þ¡£
-// ¹© BIT-Run.rc Ê¹ÓÃ
+// Microsoft Visual C++ ï¿½ï¿½ï¿½ÉµÄ°ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
+// ï¿½ï¿½ BIT-Run.rc Ê¹ï¿½ï¿½
 //
 #define GOOSE_STAND                     101
 #define GOOSE_RUN0                      102
@@ -10,12 +10,18 @@
 #define BIRD0                           301
 #define BIRD1                           302
 #define BKG                             401
+#define GYM                             501
+#define MUSEUM                          601
+#define LIBRARY                         701
+#define STONE                           801
+#define GATE                            901
+#define CLOUD                           1001
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        115
+#define _APS_NEXT_RESOURCE_VALUE        122
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

@@ -63,10 +63,10 @@ ENDM
 _refresh_interval_thread PROC 
     local @freq:QWORD ; 时钟频率
     local @time0:QWORD, @time1:QWORD ; 时间
-    local @1k:DWORD ; 常量1000 用于计算毫秒
-    mov @1k, 1000
-
-    mov $state.time, 0
+    local @last_us:DWORD ; 上一次的时间 单位微秒
+    local @1m:DWORD ; 常量1000000 用于计算微秒
+    mov @1m, 1000000
+    mov @last_us, 0
     invoke QueryPerformanceFrequency, addr @freq ; 获取时钟频率
     invoke QueryPerformanceCounter, addr @time0 ; 获取初始时间
     finit
@@ -78,29 +78,30 @@ _refresh_interval_thread PROC
         sub dword ptr @time1, eax
         sbb dword ptr @time1+4, edx
         fild @time1 ; 计数器差值
-        fimul @1k ; 乘以单位频率
+        fimul @1m ; 乘以单位频率
         fild @freq ; 除以频率 得到以单位频率为单位的时间差
         fdiv
         fistp @time1 ; 开始到现在的时间差
 
         ; 计算下一帧时间
-        mov eax, $state.time
-        add eax, 1000/FPS
+        mov eax, @last_us
+        add eax, 1000000/FPS
 
         .if eax > dword ptr @time1
             ; 时候未到
 			sub eax, dword ptr @time1
-			invoke Sleep, eax
+			;invoke Sleep, eax
         .else
             ; DEBUG 每个周期打印一个.
             invoke crt_putchar, '.'
-            
-			; 更新时间
+
+            ; 更新时间
             mov eax, dword ptr @time1
-			mov $state.time, eax
+            mov @last_us, eax
 
             ; 检测按键输入
             invoke _check_key_down
+
             ; 通知渲染缓冲区
             invoke SetEvent, $p_render_buffer_event
         .endif
@@ -112,10 +113,32 @@ _refresh_interval_thread ENDP
 
 ; 渲染缓冲区线程
 _render_buffer_thread PROC
+    local @freq:QWORD ; 时钟频率
+    local @time0:QWORD, @time1:QWORD ; 时间
+    local @1k:DWORD ; 常量1000 用于计算毫秒
+    mov @1k, 1000
+    invoke QueryPerformanceFrequency, addr @freq ; 获取时钟频率
+    invoke QueryPerformanceCounter, addr @time0 ; 获取初始时间
+    finit
     .while $thread_live != 0
         ; 事件同步
         invoke WaitForSingleObject, $p_render_buffer_event, INFINITE
         invoke ResetEvent, $p_render_buffer_event
+
+        ; 更新时间
+        invoke QueryPerformanceCounter,addr @time1
+        mov eax, dword ptr @time0
+        mov edx, dword ptr @time0+4
+        sub dword ptr @time1, eax
+        sbb dword ptr @time1+4, edx
+        fild @time1 ; 计数器差值
+        fimul @1k ; 乘以单位频率
+        fild @freq ; 除以频率 得到以单位频率为单位的时间差
+        fdiv
+        fistp @time1 ; 开始到现在的时间差
+        mov eax, dword ptr @time1
+        mov $state.time, eax
+        
 
         ; 状态更新
         invoke _state_update
