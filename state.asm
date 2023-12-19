@@ -257,6 +257,7 @@ _check_key_down PROC uses ecx edi edx
 		.if $state.status == GAME_STATUS_OVER
 			; .if $state_keypress == 0
 			.if $state_voiceinput || $state_keypress == 0
+				invoke Sleep,1000
 				invoke _reset_state
 			.endif
 		.endif
@@ -665,8 +666,8 @@ _update_obstacles PROC uses ecx esi edx ebx
 	.endif
 
 	; 最多容许添加4个云
-	.if @ncloud < 4
-		mov eax,4
+	.if @ncloud < 6
+		mov eax,6
 		sub eax,@ncloud
 		mov @ncloud,eax
 		.while @ncloud !=0
@@ -678,7 +679,7 @@ _update_obstacles PROC uses ecx esi edx ebx
 
 			invoke crt_rand
 			xor edx,edx
-			mov ebx,WINDOW_WIDTH
+			mov ebx,400
 			div ebx
 			mov eax,edx
 			add @lastcloudx,eax

@@ -3,7 +3,7 @@
 WINDOW_WIDTH EQU 768 ; 窗口宽度
 WINDOW_HEIGHT EQU 512 ; 窗口高度
 BUFFER_SIZE EQU 24 ; 缓冲大小
-RENDER_OBJ_SIZE EQU BUFFER_SIZE ;绘制集合大小
+RENDER_OBJ_SIZE EQU 16 ;绘制集合大小
 
 FPS EQU 120 ; 帧率
 FONT BYTE "LanaPixel", 0 ; 字体
@@ -31,13 +31,13 @@ INTERVAL_MAX EQU  440   ; 障碍物随机间隔最大值
 BIRD_HEIGHT_MIN EQU  128  ; 鸟高度最小值(都是相对于地面)
 BIRD_HEIGHT_MAX EQU  350  ; 鸟高度最大值
 
-CLOUD_HEIGHT_MIN EQU 450 ;  云层高度最小值（相对于窗口）
-CLOUD_HEIGHT_MAX EQU 550 ;  云层高度最大值
+CLOUD_HEIGHT_MIN EQU 200 ;  云层高度最小值（相对于窗口）
+CLOUD_HEIGHT_MAX EQU 410 ;  云层高度最大值
 
 BIRD_VX     EQU  10       ; 鸟相对于地面的速度
 
 CLOUD_VX    EQU  80      ; 云相对于地面的速度(不要用负数)
-CLOUD_INTERVAL EQU  250  ; 云最低间隔（最好要大于1/4的窗口宽度）
+CLOUD_INTERVAL EQU  100  ; 云最低间隔（最好要大于1/4的窗口宽度）
 
 
 
