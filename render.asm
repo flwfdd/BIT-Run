@@ -102,69 +102,84 @@ _check_obj_overlap PROC uses ebx esi edi ecx @p_obj1:DWORD, @p_obj2:DWORD
     mov edx, eax
     mov @p_image2, eax
 
+
     ; 快速判断矩形框是否重叠
     ; 1完全在2左侧
     mov eax, [esi + RenderObject.x]
     mov @obj1_rect.left, eax
     add eax, [ecx + Image.w]
     mov @obj1_rect.right, eax
-    .if eax <= [edi + RenderObject.x]
+    ; byd masm .if这里是无符号比较，如果此时恰好edi所指对象左侧到了屏幕外，这里是判定为正确的
+    ; 必须改用cmp指令。
+    cmp eax,[edi + RenderObject.x]
+    jg @label1_c_o_o
         xor eax, eax
         ret
-    .endif
+    @label1_c_o_o:
     ; 1完全在2右侧
     mov eax, [edi + RenderObject.x]
     mov @obj2_rect.left, eax
     add eax, [edx + Image.w]
     mov @obj2_rect.right, eax
-    .if eax <= [esi + RenderObject.x]
+    cmp eax,[esi + RenderObject.x]
+    jg @label2_c_o_o
         xor eax, eax
         ret
-    .endif
+    @label2_c_o_o:
     ; 1完全在2下方
     mov eax, [esi + RenderObject.y]
     mov @obj1_rect.bottom, eax
     add eax, [ecx + Image.h]
     mov @obj1_rect.top, eax
-    .if eax <= [edi + RenderObject.y]
+    cmp eax,[edi + RenderObject.y]
+    jg @label3_c_o_o
         xor eax, eax
         ret
-    .endif
+    @label3_c_o_o:
     ; 1完全在2上方
     mov eax, [edi + RenderObject.y]
     mov @obj2_rect.bottom, eax
     add eax, [edx + Image.h]
     mov @obj2_rect.top, eax
-    .if eax <= [esi + RenderObject.y]
+    cmp eax,[esi + RenderObject.y]
+    jg @label4_c_o_o
         xor eax, eax
         ret
-    .endif
+    @label4_c_o_o:
 
     ; 计算交叉区域
     ; 计算交叉区域左侧
     mov eax, @obj1_rect.left
-    .if eax < @obj2_rect.left
+    cmp eax,@obj2_rect.left
+    jge @label5_c_o_o
         mov eax, @obj2_rect.left
-    .endif
+    @label5_c_o_o:
     mov @overlap_rect.left, eax
     ; 计算交叉区域右侧
     mov eax, @obj1_rect.right
-    .if eax > @obj2_rect.right
+    cmp eax,@obj2_rect.right
+    jle @label6_c_o_o
         mov eax, @obj2_rect.right
-    .endif
+    @label6_c_o_o:
     mov @overlap_rect.right, eax
     ; 计算交叉区域下方
     mov eax, @obj1_rect.bottom
-    .if eax < @obj2_rect.bottom
+    cmp eax, @obj2_rect.bottom
+    jge @label7_c_o_o
         mov eax, @obj2_rect.bottom
-    .endif
+    @label7_c_o_o:
     mov @overlap_rect.bottom, eax
     ; 计算交叉区域上方
     mov eax, @obj1_rect.top
-    .if eax > @obj2_rect.top
+    cmp eax, @obj2_rect.top
+    jle @label8_c_o_o
         mov eax, @obj2_rect.top
-    .endif
+    @label8_c_o_o:
     mov @overlap_rect.top, eax
+
+    ; 下面的判断比较局限，这里由于鹅位于屏幕内，所以无论怎么样
+    ; 这个重叠区域都会保证left/bottom/right/top都是正数且保证正确的相对大小关系
+    ; 但是这个函数对于其他情况则不能够保证正确
 
     ; 像素判断是否有交叉区域
     mov esi, @overlap_rect.top ; 从上到下
