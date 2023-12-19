@@ -455,6 +455,18 @@ _update_render_object PROC uses esi ecx  @p_robj:DWORD
 
 
 	.endif
+
+	.if [esi+RenderObject.obj_id] == OBJ_BIRD
+		;´¦ÀíÄñµÄ³á°ò
+		mov eax,$state.time
+		and eax,BIRD_INTERVAL
+		.if eax !=0
+			invoke _get_image,IMAGE_BIRD0_ID
+		.else
+			invoke _get_image,IMAGE_BIRD1_ID
+		.endif
+		mov [esi+RenderObject.p_image],eax
+	.endif
 	mov eax,0
 	ret
 
