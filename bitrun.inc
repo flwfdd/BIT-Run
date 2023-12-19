@@ -3,22 +3,42 @@
 WINDOW_WIDTH EQU 768 ; 窗口宽度
 WINDOW_HEIGHT EQU 512 ; 窗口高度
 BUFFER_SIZE EQU 24 ; 缓冲大小
+RENDER_OBJ_SIZE EQU BUFFER_SIZE ;绘制集合大小
+
 FPS EQU 120 ; 帧率
 FONT BYTE "LanaPixel", 0 ; 字体
 
 HORIZON_HEIGHT EQU 32; 地面y坐标
 GOOSE_INITIAL_X EQU 100 ;鹅初始x坐标
 GOOSE_INITIAL_Y EQU HORIZON_HEIGHT ;鹅初始y坐标
-GOOSE_INTERVAL  EQU 100h  ;鹅走动间隔
+
+GOOSE_INTERVAL  EQU 100h ; 鹅走动间隔
+BIRD_INTERVAL   EQU 100h ; 鸟扇动翅膀间隔
 
 ; 这里定义都使用整数而不是浮点数
-GINIT_VX EQU 400      ; 全局x方向速度
-JUMP_VY  EQU 800      ; 鹅初始弹跳速度
+GINIT_VX   EQU 400      ; 全局x方向速度
+GLIMI_VX   EQU 800      ; 全局x方向最大速度
+DELTA_GVX  EQU 4        ; 每10秒速度增量
 
-G EQU 1530  ; 游戏内部重力加速度
-JUMPA EQU 500 ; 弹跳辅助加速度
+JUMP_VY    EQU 800      ; 鹅初始弹跳速度
 
-RENDER_OBJ_SIZE EQU BUFFER_SIZE ;绘制集合大小
+G          EQU 1530     ; 游戏内部重力加速度
+JUMPA      EQU 500      ; 弹跳辅助加速度
+
+INTERVAL_MIN EQU  250   ; 障碍物随机间隔最小值
+INTERVAL_MAX EQU  440   ; 障碍物随机间隔最大值
+
+BIRD_HEIGHT_MIN EQU  128  ; 鸟高度最小值(都是相对于地面)
+BIRD_HEIGHT_MAX EQU  350  ; 鸟高度最大值
+
+CLOUD_HEIGHT_MIN EQU 450 ;  云层高度最小值（相对于窗口）
+CLOUD_HEIGHT_MAX EQU 550 ;  云层高度最大值
+
+BIRD_VX     EQU  10       ; 鸟相对于地面的速度
+
+CLOUD_VX    EQU  80      ; 云相对于地面的速度(不要用负数)
+CLOUD_INTERVAL EQU  250  ; 云最低间隔（最好要大于1/4的窗口宽度）
+
 
 
 ; 图片结构体
@@ -37,25 +57,35 @@ RenderObject STRUCT
     obj_id DWORD ? ; 元素的ID
     x DWORD ? ; 画布上的X坐标
     y DWORD ? ; 画布上的Y坐标
-    z DWORD ? ; 优先级 大的在上面
+    z DWORD ? ; 优先级,取值为0,1,2, 优先级越高越先绘制
     p_image DWORD ? ; 图片指针
-
-    vx REAL4 ? ; 元素X方向速度
-    vy REAL4 ? ; 元素Y方向速度
+    lasttsp DWORD ?; 元素最近更新的时间 单位毫秒
     phsx REAL4 ? ; 元素物理X坐标
     phsy REAL4 ? ; 元素物理Y坐标
-    lasttsp DWORD ?; 元素最近更新的时间 单位毫秒
+    vx REAL4 ? ; 元素X方向速度
+    vy REAL4 ? ; 元素Y方向速度
 RenderObject ENDS
 
 ; 绘制元素ID
 OBJ_NONE EQU 0  ;空
 OBJ_BKG  EQU 1  ;背景
 OBJ_GOOSE EQU 2 
-OBJ_BIRD  EQU 3
-OBJ_BADGE EQU 4
-OBJ_OBSTACLE1 EQU 5
-OBJ_OBSTACLE2 EQU 6
-OBJ_DEBUG1    EQU 7
+OBJ_CLOUD EQU 3
+
+OBJ_BIRD      EQU 4
+OBJ_BADGE     EQU 5
+OBJ_GYM       EQU 6
+OBJ_MUSEUM    EQU 7
+OBJ_LIBRARY   EQU 8
+OBJ_STONE     EQU 9
+OBJ_GATE      EQU 10
+
+
+OBSTACLE_START EQU $
+$obj_array dword OBJ_BIRD , IMAGE_BIRD0_ID , OBJ_BADGE , IMAGE_BIT_BADGE_ID , OBJ_GYM , IMAGE_GYM_ID , OBJ_MUSEUM , IMAGE_MUSEUM_ID , OBJ_LIBRARY , IMAGE_LIBRARY_ID , OBJ_STONE , IMAGE_STONE_ID , OBJ_GATE , IMAGE_GATE_ID
+
+OBSTACLE_END   EQU $
+OBSTACLE_NUM   EQU (OBSTACLE_END-OBSTACLE_START)/8
 
 
 ; 游戏状态
@@ -68,6 +98,7 @@ GameState STRUCT
     status DWORD ? ; 状态
     time DWORD ? ; 时间 单位毫秒
     score DWORD ? ; 分数
+    highest_score DWORD ? ;历史最高分
     background_color DWORD ? ; 背景颜色
     render_object_size DWORD ? ; 绘制元素数量
     p_a_render_object DWORD ? ; 指向绘制元素数组的指针 数组中每个元素是RenderObject结构体

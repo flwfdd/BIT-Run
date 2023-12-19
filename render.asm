@@ -219,7 +219,7 @@ _check_obj_overlap ENDP
 
 
 ; 渲染缓冲区
-_render_buffer PROC uses ebx esi edi
+_render_buffer PROC uses ebx esi edi ecx
     ; 获取写入缓冲区的索引
     mov ebx, $buffer_index
     inc ebx
@@ -244,50 +244,39 @@ _render_buffer PROC uses ebx esi edi
     ; 释放画刷
     invoke DeleteObject, esi
 
-    ; 这里后续估计得改下
-    ; 首先渲染背景
-    mov esi, 0 ; 渲染对象索引
-    mov edi, $state.p_a_render_object ; 渲染对象地址
-    .while esi < $state.render_object_size
-        .if [edi + RenderObject.obj_id] != OBJ_BKG
+
+
+    ; 根据优先级依次绘制
+    mov ecx, 2
+    @label1_r_b:
+        mov esi, 0
+        mov edi, $state.p_a_render_object ; 渲染对象地址
+        .while esi < $state.render_object_size
+            .if [edi + RenderObject.z] != ecx
+		        inc esi
+                add edi, sizeof RenderObject
+                .continue
+            .endif
+            ; 转换坐标为左下角原点 右上方向为正
+
+            mov eax, [edi + RenderObject.p_image]
+            mov edx, WINDOW_HEIGHT
+            sub edx, [edi + RenderObject.y]
+            sub edx, [eax + Image.h]
+            push ecx
+            invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+            pop ecx
+
 		    inc esi
             add edi, sizeof RenderObject
-            .continue
-        .endif
-        ; 转换坐标为左下角原点 右上方向为正
-        mov eax, [edi + RenderObject.p_image]
-        mov edx, WINDOW_HEIGHT
-        sub edx, [edi + RenderObject.y]
-        sub edx, [eax + Image.h]
-        invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
+        .endw
 
-		inc esi
-        add edi, sizeof RenderObject
-    .endw
-
+        dec ecx
+        jge @label1_r_b
 
 
     ; 渲染对象
     mov esi, 0 ; 渲染对象索引
-    mov edi, $state.p_a_render_object ; 渲染对象地址
-    .while esi < $state.render_object_size
-
-        .if [edi + RenderObject.obj_id] == OBJ_BKG
-		    inc esi
-            add edi, sizeof RenderObject
-            .continue
-        .endif
-        ; 转换坐标为左下角原点 右上方向为正
-
-        mov eax, [edi + RenderObject.p_image]
-        mov edx, WINDOW_HEIGHT
-        sub edx, [edi + RenderObject.y]
-        sub edx, [eax + Image.h]
-        invoke TransparentBlt, $a_buffer_dc[4*ebx], [edi + RenderObject.x], edx, [eax + Image.w], [eax + Image.h], [eax + Image.h_dc], 0, 0, [eax + Image.w], [eax + Image.h], [eax + Image.mask_color]
-
-		inc esi
-        add edi, sizeof RenderObject
-    .endw
 
     ; 渲染分数
     invoke CreateFont, 20, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, offset FONT

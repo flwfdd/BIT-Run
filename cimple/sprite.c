@@ -96,7 +96,14 @@ void _state_update(){
             break;
     }
 
-    if(collide) state.status = GAME_STATUS_OVER;
+    if(collide){
+        state.status = GAME_STATUS_OVER;
+        printf("game over ! score now:%d\n",state.score);
+    }
+    else{
+        state.score+=-state.global_vx*SCORE_RATIO;
+        printf("score now:%d\n",state.score);
+    }
 
     // remove those may outbound object or draw the final score
     _update_render_list(collide);
@@ -198,8 +205,6 @@ void _update_render_list(int isOver) {
 
     // if its over , append a score show board in the render list
     if(isOver){
-        // make the a_p_render_object be a score and game over board
-        // _add_score_board() guarantee the score is last element
         return;
     }
 
