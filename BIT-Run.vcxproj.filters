@@ -60,7 +60,22 @@
     <Image Include="image\back_ground_test.bmp">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="image\bitmap2.bmp">
+    <Image Include="image\cloud.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\gate.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\gym.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\library.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\museum.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="image\stone.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
