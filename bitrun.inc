@@ -19,6 +19,7 @@ BIRD_INTERVAL   EQU 100h ; 鸟扇动翅膀间隔
 GINIT_VX   EQU 400      ; 全局x方向速度
 GLIMI_VX   EQU 800      ; 全局x方向最大速度
 DELTA_GVX  EQU 4        ; 每10秒速度增量
+ACCER_INTERVAL EQU 80h
 
 JUMP_VY    EQU 800      ; 鹅初始弹跳速度
 
@@ -38,6 +39,8 @@ BIRD_VX     EQU  10       ; 鸟相对于地面的速度
 
 CLOUD_VX    EQU  80      ; 云相对于地面的速度(不要用负数)
 CLOUD_INTERVAL EQU  100  ; 云最低间隔（最好要大于1/4的窗口宽度）
+
+SCORE_RATIO  EQU 100     ;分数系数，防止太大太快
 
 
 
