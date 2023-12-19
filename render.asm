@@ -164,11 +164,13 @@ _check_obj_overlap PROC uses ebx esi edi ecx @p_obj1:DWORD, @p_obj2:DWORD
 
     ; 像素判断是否有交叉区域
     mov esi, @overlap_rect.top ; 从上到下
+    dec esi ; 修正索引
     .while esi >= @overlap_rect.bottom
         mov edi, @overlap_rect.left ; 从左到右
         .while edi < @overlap_rect.right
             ; 计算obj1 mask中相对坐标
             mov eax, @obj1_rect.top
+            dec eax ;修正索引
             sub eax, esi ; 从上往下行索引
             mov ebx, @p_image1
             mov ebx, [ebx + Image.w]
@@ -186,6 +188,7 @@ _check_obj_overlap PROC uses ebx esi edi ecx @p_obj1:DWORD, @p_obj2:DWORD
 
             ; 计算obj2 mask中相对坐标
             mov eax, @obj2_rect.top
+            dec eax ;修正索引
             sub eax, esi ; 从上往下行索引
             mov ebx, @p_image2
             mov ebx, [ebx + Image.w]

@@ -573,25 +573,7 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 	local @iscollide
 	local @oldprecise:WORD  ; 临时存储浮点数控制字，用于舍入调整
 	local @newprecise:WORD  ;
-	mov esi,$state.p_a_render_object
-	mov @iscollide,0
 
-	mov ecx,0
-	.while ecx!=$state.render_object_size
-		.if [esi+RenderObject.obj_id] == OBJ_GOOSE || [esi+RenderObject.obj_id]==OBJ_BKG
-			inc ecx
-			add esi, sizeof RenderObject
-			.continue
-		.endif
-		invoke _check_obj_overlap,@p_goose,esi
-		.if eax !=0
-			mov @iscollide,1
-			;szText debugstr,"collide" 加上这个打印会有bug不知道为啥
-			;invoke crt_printf,addr debugstr
-		.endif
-		inc ecx
-		add esi, sizeof RenderObject
-	.endw
 
 	mov esi,@p_goose
 	.if $state_jumping ==0
@@ -693,6 +675,27 @@ _update_goose PROC uses esi ecx @p_goose:DWORD
 
 	push $state.time
 	pop [esi+RenderObject.lasttsp]
+
+	mov esi,$state.p_a_render_object
+	mov @iscollide,0
+	mov ecx,0
+	.while ecx!=$state.render_object_size
+		.if [esi+RenderObject.obj_id] == OBJ_GOOSE || [esi+RenderObject.obj_id]==OBJ_BKG
+			inc ecx
+			add esi, sizeof RenderObject
+			.continue
+		.endif
+		invoke _check_obj_overlap,@p_goose,esi
+		.if eax !=0
+			mov @iscollide,1
+			;szText debugstr,"collide" 加上这个打印会有bug不知道为啥
+			;invoke crt_printf,addr debugstr
+		.endif
+		inc ecx
+		add esi, sizeof RenderObject
+	.endw
+
+
 	mov eax,@iscollide
 	ret
 

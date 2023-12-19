@@ -35,6 +35,7 @@ const ImageRes imagesResource[] = {
         { "./image/bit_badge.bmp", 0x000000 },
         { "./image/back_ground.bmp", 0x000000},
         { "./image/tower25x50.bmp", 0x000000},
+        { "./image/bird1.bmp", 0x000000},
         { NULL, 0 }  // 结束标识符，用于遍历时判断资源的结束位置
 };
 
