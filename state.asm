@@ -252,10 +252,6 @@ _state_update PROC uses ebx esi
 		invoke PlaySound, SOUND_GOOSE_ID, NULL, SND_RESOURCE or SND_ASYNC
 	.endif
 
-	; DEBUG 打印分数
-	szText @debugstr1, "current score:%d"
-	invoke crt_printf,addr @debugstr1,$state.score
-
 	; 增加全局速度，同时加速所有物体
 	invoke _accelerate_all_obj
 

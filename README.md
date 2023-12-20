@@ -1,4 +1,22 @@
-# BIT-Run
+# 北理润 - BITRun
+
+## 环境配置
+
+开发使用`Visual Studio 2022`，安装时选择C++套件，需要勾选依赖`MSVC v140`（高版本不兼容），默认勾选的除了`Windows SDK`外都可以不勾选以节省空间。更改代码后可能需要重新生成解决方案再运行。
+
+另外还需要安装`MASM32`，前往官网下载安装包：[http://www.masm32.com/download.htm](http://www.masm32.com/download.htm)。安装时选择安装到`C:\masm32`，如果安装到其他目录需要在项目属性中对应修改。
+
+项目属性中几个更改的地方：
+
+* 在项目目录上右键，选择“属性”，在常规面板中更改“平台工具集”为`Visual Studio 2015 (v140)`，并更改“Windows SDK版本”为安装的具体版本。
+
+* 更改“链接器”、“常规”中的“附加库目录”为`C:\masm32\lib;%(AdditionalLibraryDirectories)`。
+
+* 更改“Microsoft Macro Assembler”、“General”中的“Inlude Paths”为`C:\masm32\include`。
+
+* 在“连接器”、“系统”中更改“子系统”可以切换是否显示控制台窗口。
+
+注意在配置属性和运行时都要选择`Win32`或`x86`，不要出现`x64`。
 
 ## 代码规范
 

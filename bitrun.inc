@@ -27,7 +27,7 @@ JUMP_VY    EQU 1000      ; 鹅初始弹跳速度
 G          EQU 3000     ; 游戏内部重力加速度
 JUMPA      EQU 1000      ; 弹跳辅助加速度
 
-INTERVAL_MIN EQU  WINDOW_WIDTH/4   ; 障碍物随机间隔最小值
+INTERVAL_MIN EQU  WINDOW_WIDTH/3   ; 障碍物随机间隔最小值
 INTERVAL_MAX EQU  WINDOW_WIDTH   ; 障碍物随机间隔最大值
 
 BIRD_HEIGHT_MIN EQU  WINDOW_HEIGHT/8  ; 鸟高度最小值(都是相对于地面)
