@@ -685,6 +685,8 @@ _update_obstacles PROC uses ecx esi edx ebx
 	local @remain:dword				; 剩余的空间
 
 	local @id:dword
+	local hProvider:dword
+	local random_bytes:dword
 
 
 	.if $state.render_object_size == RENDER_OBJ_SIZE
@@ -701,8 +703,6 @@ _update_obstacles PROC uses ecx esi edx ebx
 	sub ecx,$state.render_object_size
 	mov @remain,ecx
 
-	invoke crt_time,0
-	invoke srand,eax
 
 	; 查找排在最后面的云，并添加一朵新的云 
 	mov edx, $state.render_object_size
@@ -738,7 +738,13 @@ _update_obstacles PROC uses ecx esi edx ebx
 			invoke _get_image,eax
 			mov @cloud.p_image,eax
 
-			invoke crt_rand
+			CRYPT_VERIFYCONTEXT = 0F0000000h
+    		PROV_RSA_FULL = 1
+			   
+    		invoke CryptAcquireContext, ADDR hProvider, 0, 0, PROV_RSA_FULL,CRYPT_VERIFYCONTEXT
+
+			invoke CryptGenRandom, hProvider, 1, ADDR random_bytes
+			mov eax,random_bytes
 			xor edx,edx
 			mov ebx,400
 			div ebx
@@ -749,13 +755,17 @@ _update_obstacles PROC uses ecx esi edx ebx
 			mov eax,@lastcloudx
 			RobjLoadx @cloud,eax
 
-			invoke crt_rand
+			invoke CryptGenRandom, hProvider, 1, ADDR random_bytes
+			mov eax,random_bytes
 			xor edx,edx
 			mov ebx, CLOUD_HEIGHT_MAX-CLOUD_HEIGHT_MIN
 			div ebx
 			mov eax,edx
 			add eax,CLOUD_HEIGHT_MIN
 			RobjLoady @cloud,eax
+
+			szText @debugstr3,"generate a cloud with height:%d"
+			invoke crt_printf,addr @debugstr3,@cloud.y
 
 			mov @cloud.z,1
 
