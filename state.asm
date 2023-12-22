@@ -17,7 +17,8 @@ include     winmm.inc
 includelib  winmm.lib
 include     msvcrt.inc
 includelib  msvcrt.lib
-include     wdm.inc
+include     advapi32.inc
+includelib  advapi32.lib
 
 extern $h_instance:dword ; ³ÌÐòÊµÀý¾ä±ú
 extern $h_window_main:dword ; Ö÷´°¿Ú¾ä±ú
